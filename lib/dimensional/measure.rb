@@ -23,9 +23,8 @@ module Dimensional
       elements = str.to_s.scan(NUMERIC_REGEXP).map do |(v, us)|
         units = units.select{|u| system == u.system} if system
         unit = us.nil? ? units.first : units.detect{|u| u.match(us.to_s)}
-        raise ArgumentError, "Unit cannot be determined and no default available" unless unit
+        raise ArgumentError, "Unit cannot be determined (#{us})" unless unit
         system = unit.system
-#        value = v.include?('.') ? v.to_f : v.to_i
         value = unit.dimension.nil? ? v.to_i : v.to_f
         new(value, unit, metric)
       end
@@ -49,7 +48,7 @@ module Dimensional
     # Convert this dimensional value to a different unit
     def convert(new_unit)
       new_value = self * unit.convert(new_unit)
-      self.class.new(new_value, new_unit)
+      self.class.new(new_value, new_unit, metric)
     end
 
     # Return a new dimensional value expressed in the base unit
@@ -60,8 +59,12 @@ module Dimensional
       convert(unit.base)
     end
 
+    def native
+      metric.dimension ? to_f : to_i
+    end
+
     def to_s
-      super + unit.abbreviation
+      strfmeasure(metric.preferences(unit)[:format]) rescue super
     end
 
     # Like Date, Time and DateTime, Measure represents both a value and a context.  Like those built-in classes,
@@ -73,13 +76,19 @@ module Dimensional
     # All other specifiers are applied to the numeric value of the measure.
     # TODO: Support positional arguments (n$).
     # TODO: Support modulo subordinate units with format hash -> {1 => "'", 12 => :inch} or {1 => "%d#", 16 => "%doz."}
-    def strfmeasure(format = nil)
+    def strfmeasure(format = nil, *args)
+      v = if precision = metric.preferences(unit)[:precision]
+        pfactor = 10**(-precision)
+        ((self * pfactor).round / pfactor.to_f).to_s
+      else
+        native
+      end
       format = format || unit.format
       format.gsub!(/%(#)?([\d.\-\*]*)U/) do |s|
         arg = ($1) ? unit.name : unit.abbreviation
         Kernel.sprintf("%#{$2}s", arg)
       end
-      Kernel.sprintf(format, self)
+      Kernel.sprintf(format, v, *args)
     end
 
     def inspect

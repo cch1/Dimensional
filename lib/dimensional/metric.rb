@@ -2,6 +2,7 @@ require 'dimensional/dimension'
 
 module Dimensional
   # A specific physical entity that can be measured.
+  # TODO: Add a hierarchy that allows metrics to be grouped by domain, like shipping, carpentry or sports
   class Metric
     include Enumerable
 

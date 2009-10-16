@@ -77,8 +77,8 @@ Dimensional::Configurator.start do
   dimension(:A) do
     system(:SI) do
       combine('square meter', %w(meter meter).map{|name| Dimensional::Unit[:L, :SI, name]}, :detector => /\A(sq\.?\s?meters?|m2)\Z/, :abbreviation => 'm2') do
-        derive('hectare', 10000.0, :abbreviation => 'ha') do
-          prefer(:forestry, :precision => 1)
+        derive('hectare', 10000, :format => "%.4f%U", :abbreviation => 'ha') do
+          prefer(:forestry, :precision => -4, :format => "%s%U")
         end
       end
     end

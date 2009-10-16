@@ -5,8 +5,8 @@ require 'enumerator'
 
 module Dimensional
   # A standard scale unit for measuring physical quantities.  In addition to the Dimension and System attribute
-  # that are well defined by classes above, the user-defined domain attribute is available to identify units as
-  # belonging to an arbitrary domain like shipping, carpentry or sports.  Effective use of the domain attribute
+  # that are well-defined by classes above, the user-defined metric attribute is available to identify units as
+  # belonging to an arbitrary metric like length, draft or property size.  Effective use of the metric attribute
   # can simplify presentation of Measures and make parsing of user input more accurate. 
   # Reference: http://en.wikipedia.org/wiki/Units_of_measurement
   class Unit
@@ -44,7 +44,7 @@ module Dimensional
       @reference_unit = options[:reference_unit]
       @detector = options[:detector] || /\A#{self.name}\Z/
       @abbreviation = (options[:abbreviation] || self.name).to_s
-      @format = options[:format] || "%p%U"
+      @format = options[:format] || dimension.nil? ? "%s %U" : "%s%U"
     end
     
     def match(s)

@@ -37,7 +37,8 @@ class MeasureTest < Test::Unit::TestCase
           end
         end
         system(:BA) do
-          base('mile', :detector => /\A(miles?|nm|nmi)\Z/, :abbreviation => 'nm') do 
+          base('mile', :detector => /\A(miles?|nm|nmi)\Z/, :abbreviation => 'nm') do
+            prefer(:distance, :precision => -2)
             derive('cable', Rational(1,10), :detector => /\A(cables?|cbls?)\Z/) do
               derive('fathom', Rational(1,10), :detector => /\A(fathoms?|fms?)\Z/, :abbreviation => 'fm') do
                 derive('yard', Rational(1,6), :detector => /\A(yards?|yds?)\Z/, :abbreviation => 'yd') do
@@ -73,7 +74,7 @@ class MeasureTest < Test::Unit::TestCase
     Metric.reset!
   end
 
-  def test_should_create_new_measure
+  def test_create_new_measure
     u = Unit[:L, :BA, 'mile']
     assert m = Measure.new(3000, u, :length)
     assert_equal 3000, m
@@ -81,15 +82,30 @@ class MeasureTest < Test::Unit::TestCase
     assert_same Metric[:length], m.metric
   end
 
-  def test_should_convert
+  def test_to_f
+    d = Measure.parse("1.85m", :L, :SI)
+    assert_instance_of Float, d.to_f
+  end
+
+  def test_to_i
+    d = Measure.parse("1 each", Metric[nil])
+    assert_instance_of Fixnum, d.to_i
+  end
+
+  def test_to_native
+    d = Measure.parse("1 each", Metric[nil])
+    assert_instance_of Fixnum, d.native
+  end
+
+  def test_convert
     old_unit = Unit[:L, :BA, 'cable']
     new_unit = Unit[:L, :BA, 'fathom']
     new = Measure.new(1, old_unit).convert(new_unit)
     assert_in_delta(10, new, 0.000001)
-    assert_equal new_unit, new.unit
+    assert_same new_unit, new.unit
   end
 
-  def test_should_do_identity_conversion
+  def test_do_identity_conversion
     old_unit = Unit[:L, :BA, 'cable']
     new_unit = old_unit
     old_value = Measure.new(12, old_unit)
@@ -97,50 +113,50 @@ class MeasureTest < Test::Unit::TestCase
     assert_equal old_value, new_value
   end
 
-  def test_should_return_base
+  def test_return_base
     u = Unit[:L, :BA, 'fathom']
     b = Measure.new(1, u).base
     assert_in_delta(1e-2, b, 0.000001)
     assert_same u.base, b.unit
   end
 
-  def test_should_parse
+  def test_parse
     assert m = Measure.parse("15'", :L, :BA)
     assert_same Unit[:L, :BA, 'foot'], m.unit
     assert_equal 15, m
   end
   
-  def test_should_parse_with_whitespace
+  def test_parse_with_whitespace
     m = Measure.parse("15 feet", :L, :BA)
     assert_same Unit[:L, :BA, 'foot'], m.unit
     assert_equal 15, m
   end
 
-  def test_should_parse_compound
+  def test_parse_compound
     d = Measure.parse("15'11\"", :L, :US)
     assert_in_delta(15 + Rational(11, 12), d, 0.000001)
   end
 
-  def test_should_parse_compound_with_whitespace
+  def test_parse_compound_with_whitespace
     d = Measure.parse("1 foot 11 inches", :L, :US)
     assert_same d.unit, Unit[:L, :US, 'foot']
     assert_in_delta(1 + Rational(11, 12).to_f, d, 0.000001)
   end
 
-  def test_should_raise_on_parse_of_mixed_compound
+  def test_raise_on_parse_of_mixed_compound
     assert_raises ArgumentError do
       Measure.parse("1 foot 11cm", :L)
     end
   end
 
-  def test_should_parse_with_default_unit
+  def test_parse_with_default_unit
     metric = Metric[:L]
     du = metric.units.first
     assert_instance_of Measure, m = Measure.parse("10", :L) 
     assert_equal du, m.unit
   end
 
-  def test_should_parse_dimensionless_units
+  def test_parse_dimensionless_units
     assert m = Measure.parse('2 dozen', nil)
     assert_instance_of Measure, m
     assert_equal 2, m
@@ -149,16 +165,21 @@ class MeasureTest < Test::Unit::TestCase
     assert_nil m.unit.dimension
   end
   
-  def test_should_stringify_with_abbreviation
+  def test_stringify_with_abbreviation
     assert_equal "1.85nm", Measure.parse('1.85 miles', :L, :BA).to_s
   end
 
-  def test_should_parse_gibberish_as_nil
+  def test_parse_gibberish_as_nil
     assert_nil Measure.parse("gibberish", :L)
   end
   
-  def test_should_format_output
+  def test_format_output
     m = Measure.parse("15'3\"", :L, :BA)
     assert_equal "15.25 (ft)", m.strfmeasure("%4.2f (%U)")
+  end
+
+  def test_precision_recognition
+    assert_equal "1.8600nm", Measure.parse('1.8565454 miles', :distance, :BA).strfmeasure("%.4f%U")
+    assert_equal "1.86", Measure.parse('1.8565454 miles', :distance, :BA).strfmeasure("%s")
   end
 end

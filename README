@@ -1,0 +1,11 @@
+# This library aims to provide effective parsing of user-supplied measures/metrics, intuitive scaling of those
+# measures into a standard base scale unit and intuitive presentation of values.  It does not attempt to mixin
+# unit-oriented methods into Ruby standard classes -to perform operations, particularly across dimensions, you
+# will need to use basic conversion methods provided by this library combined with standard Ruby numerical oper-
+# ations.  There is no method_missing magic or large mixin of spiffy unit-like methods here.
+
+# The long-term objective for this library is to achieve compliance with the UCUM standard, with additional
+# facilities for simple parsing and formatting of measures according to localized standards, and conversion
+# of measures between units.  References:
+#   UCUM Website: http://unitsofmeasure.org/
+#   UCUM Standard: http://aurora.regenstrief.org/~ucum/ucum.html

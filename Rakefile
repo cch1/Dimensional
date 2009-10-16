@@ -21,11 +21,11 @@ spec = Gem::Specification.new do |s|
   s.date = %q{2009-10-09}
   s.authors = ["Chris Hapgood"]
   s.email = %q{cch1@hapgoods.com}
-  s.summary = %q{Dimensional provides handling for dimensional values (numbers with units).}
+  s.summary = %q{Dimensional provides handling for numbers with units.}
   s.homepage = %q{http://cho.hapgoods.com/dimensional}
   s.description = <<-EOF
-    Dimensional provides handling for dimensional values (numbers with units).  Dimensional values can be parsed, 
-    stored, converted and formatted for output.
+    Dimensional provides handling for dimensional values (numbers with units).  Dimensional values
+    can be parsed, stored, converted and formatted for output.
   EOF
   s.files = Dir['lib/**/*.rb'] + Dir['test/**/*.rb']
   s.files += ["README", "CHANGELOG", "LICENSE", "Rakefile"]

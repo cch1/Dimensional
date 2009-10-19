@@ -5,7 +5,7 @@ class DimensionalTest < Test::Unit::TestCase
   include Dimensional
 
   def setup
-    load 'demo.rb'
+    load 'test/demo.rb'
   end
 
   def teardown

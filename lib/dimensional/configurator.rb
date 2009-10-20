@@ -39,7 +39,6 @@ module Dimensional
       if block
         self.class.new(new_context).instance_eval &block
       else
-        @context = new_context
         self # Allow chaining
       end
     end

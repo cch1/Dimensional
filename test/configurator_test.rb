@@ -59,6 +59,21 @@ class ConfiguratorTest < Test::Unit::TestCase
     end
   end
 
+  def test_preserve_context_within_block
+    test_context = self
+    Dimensional::Configurator.start do
+      dimension(:L) do
+        system(:SI) do
+          base('meter') do
+            test_context.assert uc = context.unit
+            derive('centimeter', 1e-2)
+            test_context.assert_same uc, context.unit
+          end
+        end
+      end
+    end
+  end
+
   def test_build_base_unit
     Configurator.start(:system => System::SI, :dimension => Dimension::L) do
       base('meter', :detector => /\A(meters?|m)\Z/, :abbreviation => 'm')

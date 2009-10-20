@@ -4,5 +4,5 @@ require 'dimensional/unit'
 require 'dimensional/measure'
 
 module Dimensional
-  VERSION = "0.0.2"
+  VERSION = "0.0.3"
 end

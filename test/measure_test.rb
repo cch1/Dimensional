@@ -112,6 +112,47 @@ class MeasureTest < Test::Unit::TestCase
     new_value = old_value.convert(new_unit)
     assert_equal old_value, new_value
   end
+  
+  # These system-conversion tests rely on very specific constants in the heuristics of #change_system
+  def test_change_system_yd
+    u0 = Unit[:L, :US, 'yd']
+    m0 = Measure.new(1, u0, :length_over_all)
+    u1 = Unit[:L, :SI, 'm']
+    assert m1 = m0.change_system(:SI)
+    assert_same u1, m1.unit
+  end
+
+  def test_change_system_with_metric_override
+    u0 = Unit[:L, :US, 'in']
+    m0 = Measure.new(1, u0, :length_over_all)
+    u1 = Unit[:L, :SI, 'm']
+    assert m1 = m0.change_system(:SI)
+    assert_same u1, m1.unit
+  end
+
+  def test_change_system_with_oom_dominance
+    u0 = Unit[:L, :US, 'in']
+    m0 = Measure.new(1, u0, :L)
+    u1 = Unit[:L, :SI, 'cm']
+    assert m1 = m0.change_system(:SI)
+    assert_same u1, m1.unit
+  end
+
+  def test_change_system_ft
+    u0 = Unit[:L, :US, 'ft']
+    m0 = Measure.new(1, u0, :length_over_all)
+    u1 = Unit[:L, :SI, 'm']
+    assert m1 = m0.change_system(:SI)
+    assert_same u1, m1.unit
+  end
+
+  def test_change_system_mile
+    u0 = Unit[:L, :US, 'mile']
+    m0 = Measure.new(1, u0, :length_over_all)
+    u1 = Unit[:L, :SI, 'km']
+    assert m1 = m0.change_system(:SI)
+    assert_same u1, m1.unit
+  end
 
   def test_return_base
     u = Unit[:L, :BA, 'fathom']

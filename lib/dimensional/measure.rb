@@ -50,6 +50,29 @@ module Dimensional
       new_value = self * unit.convert(new_unit)
       self.class.new(new_value, new_unit, metric)
     end
+    
+    # Convert this measure to the most appropriate unit in the given system
+    # A heuristic approach is used that considers the resulting measure's order-of-magnitude (similar
+    # is good) and membership in the preferred units of the measure's metric (membership is good).
+    def change_system(system, fallback = false)
+      system = System[system] unless system.kind_of?(System)
+      units = metric.units.select{|u| system == u.system}
+      if units.empty?
+        if fallback
+          units = metric.units
+        else
+          raise "No suitable units available in #{system}"
+        end
+      end
+      target_oom = Math.log10(self.unit.factor)
+      units = units.sort_by do |u|
+        oom_delta = (Math.log10(u.factor) - target_oom).abs #  == Math.log10(self.unit.factor / u.factor)
+        magnitude_fit = Math.exp(-0.20 * oom_delta) # decay function
+        0.75 * magnitude_fit + 0.25 * metric.preference(u)
+      end
+      u = units.last
+      convert(u)
+    end
 
     # Return a new dimensional value expressed in the base unit
     # DEPRECATE: this method has dubious semantics for composed units as there may be no defined unit with

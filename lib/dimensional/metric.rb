@@ -37,15 +37,20 @@ module Dimensional
       raise "Unit #{unit} is not compatible with dimension #{dimension || '<nil>'}." unless unit.dimension == dimension
       @units[unit] = options
     end
-    
+
     def units
       baseline = parent ? parent.units : @units.keys
-      baseline.sort_by{|u| @units.has_key?(u) ? 0 : 1}
+      baseline.sort_by{|u| 1.0 - preference(u)}
     end
   
     def preferences(u)
       baseline = parent ? parent.preferences(u) : {} 
       baseline.merge(@units[u])
+    end
+    
+    # How "preferred" is the given unit for this metric?
+    def preference(u)
+      @units.has_key?(u) ? 1 : 0
     end
 
     def each

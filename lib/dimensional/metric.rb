@@ -40,7 +40,7 @@ module Dimensional
     
     def units
       baseline = parent ? parent.units : @units.keys
-      baseline.sort{|a,b| (@units.has_key?(b) ? 1 : 0) <=> (@units.has_key?(a) ? 1 : 0)}
+      baseline.sort_by{|u| @units.has_key?(u) ? 0 : 1}
     end
   
     def preferences(u)

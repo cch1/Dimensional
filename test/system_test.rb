@@ -10,13 +10,13 @@ class SystemTest < Test::Unit::TestCase
 
   def test_create_new_measurement_system
     assert_instance_of System, s = System.new('British Admiralty')
-    assert_equal 'British Admiralty', s.name
+    assert_equal 'British Admiralty', s
     assert_nil s.abbreviation
   end
   
   def test_create_new_measurement_system_with_abbreviation
     assert_instance_of System, s = System.new('British Admiralty', 'BA')
-    assert_equal 'British Admiralty', s.name
+    assert_equal 'British Admiralty', s
     assert_equal 'BA', s.abbreviation
   end
   

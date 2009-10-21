@@ -16,7 +16,7 @@ Rake::Task['test'].comment = "Run all tests in test/*_test.rb"
 spec = Gem::Specification.new do |s|
   s.platform = Gem::Platform::RUBY
   s.name = %q{dimensional}
-  s.version = "0.0.3"
+  s.version = "0.0.4"
   s.required_ruby_version = '>= 1.6.8'
   s.date = %q{2009-10-09}
   s.authors = ["Chris Hapgood"]

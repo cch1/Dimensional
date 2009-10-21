@@ -40,7 +40,7 @@ module Dimensional
 
     def units
       baseline = parent ? parent.units : @units.keys
-      baseline.sort_by{|u| 1.0 - preference(u)}
+      baseline.sort_by{|u| [1.0 - preference(u), u.name, u.system]}
     end
   
     def preferences(u)

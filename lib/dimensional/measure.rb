@@ -82,12 +82,8 @@ module Dimensional
       convert(unit.base)
     end
 
-    def native
-      metric.dimension ? to_f : to_i
-    end
-
     def to_s
-      strfmeasure(metric.preferences(unit)[:format]) rescue super
+      strfmeasure(metric.preferences(unit)[:format] || "%s%U")
     end
 
     # Like Date, Time and DateTime, Measure represents both a value and a context.  Like those built-in classes,
@@ -97,25 +93,30 @@ module Dimensional
     #       In addition, this specifier supports the same width and precision modfiers as the '%s' specifier.  
     #       For example: %#10.10U
     # All other specifiers are applied to the numeric value of the measure.
-    # TODO: Support positional arguments (n$).
     # TODO: Support modulo subordinate units with format hash -> {1 => "'", 12 => :inch} or {1 => "%d#", 16 => "%doz."}
-    def strfmeasure(format = nil, *args)
+    def strfmeasure(format)
+      # We need the native value to prevent infinite recursion if the user specifies the %s specifier.
       v = if precision = metric.preferences(unit)[:precision]
         pfactor = 10**(-precision)
         ((self * pfactor).round / pfactor.to_f).to_s
       else
         native
       end
-      format = format || unit.format
-      format.gsub!(/%(#)?([\d.\-\*]*)U/) do |s|
-        arg = ($1) ? unit.name : unit.abbreviation
-        Kernel.sprintf("%#{$2}s", arg)
+      format = format.gsub(/%(#)?([\d.\-\*]*)U/) do |s|
+        us = ($1) ? unit.name : (unit.abbreviation || unit.name)
+        Kernel.sprintf("%#{$2}s", us)
       end
-      Kernel.sprintf(format, v, *args)
+      count = format.scan(/(?:\A|[^%])(%[^% ]*[A-Za-z])/).size
+      Kernel.sprintf(format, *Array.new(count, v)) 
     end
 
     def inspect
-      "#{super} : #{unit.inspect}"
+      strfmeasure("<%p <%#U>>")
+    end
+
+    private
+    def native
+      metric.dimension ? to_f : to_i
     end
   end
 end

@@ -92,11 +92,6 @@ class MeasureTest < Test::Unit::TestCase
     assert_instance_of Fixnum, d.to_i
   end
 
-  def test_to_native
-    d = Measure.parse("1 each", Metric[nil])
-    assert_instance_of Fixnum, d.native
-  end
-
   def test_convert
     old_unit = Unit[:L, :BA, 'cable']
     new_unit = Unit[:L, :BA, 'fathom']
@@ -217,6 +212,11 @@ class MeasureTest < Test::Unit::TestCase
   def test_format_output
     m = Measure.parse("15'3\"", :L, :BA)
     assert_equal "15.25 (ft)", m.strfmeasure("%4.2f (%U)")
+  end
+
+  def test_format_output_with_multiple_substitutions
+    m = Measure.parse("15'4\"", :L, :BA)
+    assert_equal "15.33 (ft)\t%\t<15.3333333ft>", m.strfmeasure("%4.2f (%U)\t%%\t<%.10s%U>")
   end
 
   def test_precision_recognition

@@ -15,7 +15,7 @@ module Dimensional
     def self.register(*args)
       u = new(*args)
       raise "Namespace collision: #{u.dimension}:#{u.system}:#{u.name}" if self[u.dimension, u.system, u.name.to_sym]
-      raise "Namespace collision: #{u.dimension}:#{u.system}:#{u.abbreviation}" if self[u.dimension, u.system, u.abbreviation.to_sym]
+      raise "Namespace collision: #{u.dimension}:#{u.system}:#{u.abbreviation}" if self[u.dimension, u.system, u.abbreviation.to_sym] if u.abbreviation
       @store << u
       u
     end
@@ -25,7 +25,8 @@ module Dimensional
       dim = Dimension[dim] unless dim.kind_of?(Dimension)
       sys = System[sys] unless sys.kind_of?(System)
       sym = sym.to_sym
-      @store.select{|u| u.dimension == dim}.select{|u| u.system == sys}.detect{|u| sym == u.abbreviation.to_sym || sym == u.name.to_sym}
+      us = @store.select{|u| u.dimension == dim}.select{|u| u.system == sys}
+      us.detect{|u| sym == u.name.to_sym || (u.abbreviation && sym == u.abbreviation.to_sym)}
     end
 
     def self.reset!
@@ -43,7 +44,7 @@ module Dimensional
       @reference_factor = options[:reference_factor]
       @reference_unit = options[:reference_unit]
       @detector = options[:detector] || /\A#{self.name}\Z/
-      @abbreviation = (options[:abbreviation] || self.name).to_s
+      @abbreviation = options[:abbreviation]
       @format = options[:format] || dimension.nil? ? "%s %U" : "%s%U"
     end
     

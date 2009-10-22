@@ -19,32 +19,32 @@ class MeasureTest < Test::Unit::TestCase
     Configurator.start do
       dimension(:L) do
         system(:SI) do
-          base('meter', :detector => /\A(meters?|m)\Z/, :abbreviation => 'm') do
+          base('meter', 'm', :detector => /\A(meters?|m)\Z/) do
             prefer(:length_over_all, :precision => 0.01)
-            derive('centimeter', 1e-2, :detector => /\A(centimeters?|cm)\Z/, :abbreviation => 'cm')
-            derive('kilometer', 1e3, :detector => /\A(kilometers?|km)\Z/, :abbreviation => 'km')
+            derive('centimeter', 'cm', 1e-2, :detector => /\A(centimeters?|cm)\Z/)
+            derive('kilometer', 'km', 1e3, :detector => /\A(kilometers?|km)\Z/)
           end
         end
         system(:US) do # As of 1 July 1959 (http://en.wikipedia.org/wiki/United_States_customary_units#Units_of_length)
-          reference('yard', Unit[:L, :SI, 'meter'], 0.9144, :detector => /\A(yards?|yds?)\Z/, :abbreviation => 'yd') do
-            derive('foot', Rational(1,3), :detector => /\A(foot|feet|ft|')\Z/, :abbreviation => "ft", :format => "%p'") do
+          reference('yard', 'yd', Unit[:L, :SI, 'meter'], 0.9144, :detector => /\A(yards?|yds?)\Z/) do
+            derive('foot', 'ft', Rational(1,3), :detector => /\A(foot|feet|ft|')\Z/, :format => "%p'") do
               prefer(:length_over_all, :precision => Rational(1, 12))
-              derive('inch', Rational(1,12), :detector => /\A(inch|inches|in|")\Z/, :abbreviation =>"in", :format => "%p\"")          
+              derive('inch', 'in', Rational(1,12), :detector => /\A(inch|inches|in|")\Z/, :format => "%p\"")          
             end
-            derive('furlong', 220, :detector => /\A(furlongs?)\Z/) do
-              derive('mile', 8, :detector => /\Amiles?\Z/, :abbreviation => 'mi')
+            derive('furlong', nil, 220, :detector => /\A(furlongs?)\Z/) do
+              derive('mile', 'mi', 8, :detector => /\Amiles?\Z/)
             end
           end
         end
         system(:BA) do
-          base('mile', :detector => /\A(miles?|nm|nmi)\Z/, :abbreviation => 'nm') do
+          base('mile', 'nm', :detector => /\A(miles?|nm|nmi)\Z/) do
             prefer(:distance, :precision => -2)
-            derive('cable', Rational(1,10), :detector => /\A(cables?|cbls?)\Z/) do
-              derive('fathom', Rational(1,10), :detector => /\A(fathoms?|fms?)\Z/, :abbreviation => 'fm') do
-                derive('yard', Rational(1,6), :detector => /\A(yards?|yds?)\Z/, :abbreviation => 'yd') do
-                  derive('foot', Rational(1,3), :detector => /\A(foot|feet|ft|')\Z/, :abbreviation => "ft") do
+            derive('cable', nil, Rational(1,10), :detector => /\A(cables?|cbls?)\Z/) do
+              derive('fathom', 'fm', Rational(1,10), :detector => /\A(fathoms?|fms?)\Z/) do
+                derive('yard', 'yd', Rational(1,6), :detector => /\A(yards?|yds?)\Z/) do
+                  derive('foot', 'ft', Rational(1,3), :detector => /\A(foot|feet|ft|')\Z/) do
                     prefer(:length_over_all, :precision => Rational(1, 12))
-                    derive('inch', Rational(1,12), :detector => /\A(inch|inches|in|")\Z/, :abbreviation => "in")
+                    derive('inch', 'in', Rational(1,12), :detector => /\A(inch|inches|in|")\Z/)
                   end
                 end
               end
@@ -54,15 +54,15 @@ class MeasureTest < Test::Unit::TestCase
       end
       dimension(:M) do
         system(:SI) do
-          base('kilogram', :detector => /\A(kilograms?|kg)\Z/, :abbreviation => 'kg') do
-            derive('tonne', 1000, :detector => /\A(tonnes?)\Z/, :abbreviation => 't') # metric ton
-            derive('gram', Rational(1, 1000), :detector => /\A(grams?|g)\Z/, :abbreviation => 'g')
+          base('kilogram', 'kg', :detector => /\A(kilograms?|kg)\Z/) do
+            derive('tonne', 't', 1000, :detector => /\A(tonnes?)\Z/) # metric ton
+            derive('gram', 'g', Rational(1, 1000), :detector => /\A(grams?|g)\Z/)
           end
         end
       end
       # Dimensionless Units
-      base('each', :abbreviation => 'ea') do
-        derive('dozen', 12, :abbreviation => 'dz')
+      base('each', 'ea') do
+        derive('dozen', 'dz', 12)
       end
     end
   end

@@ -20,75 +20,75 @@ Dimensional::System.register('British Imperial (lbs, ton, ft)', 'Imp')  # http:/
 Dimensional::Configurator.start do
   dimension(:L) do
     system(:SI) do
-      base('meter', :detector => /\A(meters?|m)\Z/, :abbreviation => 'm') do
-        derive('centimeter', 1e-2, :detector => /\A(centimeters?|cm)\Z/, :abbreviation => 'cm')
-        derive('kilometer', 1e3, :detector => /\A(kilometers?|km)\Z/, :abbreviation => 'km')
+      base('meter', 'm', :detector => /\A(meters?|m)\Z/) do
+        derive('centimeter', 'cm', Rational(1, 100), :detector => /\A(centimeters?|cm)\Z/)
+        derive('kilometer', 'km', 1000, :detector => /\A(kilometers?|km)\Z/)
       end
     end
     system(:US) do # As of 1 July 1959 (http://en.wikipedia.org/wiki/United_States_customary_units#Units_of_length)
-      reference('yard', Dimensional::Unit[:L, :SI, 'meter'], 0.9144, :detector => /\A(yards?|yds?)\Z/, :abbreviation => 'yd') do
-        derive('foot', Rational(1,3), :detector => /\A(foot|feet|ft|')\Z/, :abbreviation => "ft", :format => "%p'") do
+      reference('yard', 'yd', Dimensional::Unit[:L, :SI, 'meter'], 0.9144, :detector => /\A(yards?|yds?)\Z/) do
+        derive('foot', 'ft', Rational(1,3), :detector => /\A(foot|feet|ft|')\Z/, :format => "%p'") do
           prefer(:hull)
-          derive('inch', Rational(1,12), :detector => /\A(inch|inches|in|")\Z/, :abbreviation =>"in", :format => "%p\"")          
+          derive('inch', 'in', Rational(1,12), :detector => /\A(inch|inches|in|")\Z/, :format => "%p\"")          
         end
-        derive('furlong', 220, :detector => /\A(furlongs?)\Z/) do
-          derive('mile', 8, :detector => /\Amiles?\Z/, :abbreviation => 'mi')
+        derive('furlong', nil, 220, :detector => /\A(furlongs?)\Z/) do
+          derive('mile', 'mi', 8, :detector => /\Amiles?\Z/)
         end
       end
     end
   end
   dimension(:M) do
     system(:SI) do
-      base('kilogram', :detector => /\A(kilograms?|kg)\Z/, :abbreviation => 'kg') do
-        derive('tonne', 1e3, :detector => /\A(tonnes?)\Z/, :abbreviation => 't') do # metric ton
+      base('kilogram', 'kg', :detector => /\A(kilograms?|kg)\Z/) do
+        derive('tonne', 't', 1000, :detector => /\A(tonnes?)\Z/) do # metric ton
           prefer(:displacement)
         end
-        derive('gram', 1e-3, :detector => /\A(grams?|g)\Z/, :abbreviation => 'g')
+        derive('gram', 'g', Rational(1, 1000), :detector => /\A(grams?|g)\Z/)
       end
     end
     system(:US) do # Common units for mass and, occasionally, force/weight (http://en.wikipedia.org/wiki/United_States_customary_units#Units_of_mass)
-      reference('pound', Dimensional::Unit[:M, :SI, 'gram'], 453.59237, :detector => /\A(pounds?|lbs?|#)\Z/, :abbreviation => 'lb') do # avoirdupois
-        derive('hundredweight', 100, :detector => /\A(hundredweights?|cwt)\Z/, :abbreviation => 'cwt') do
-          derive('ton', 20, :detector => /\A(tons?|t)\Z/, :abbreviation => 't') do # short ton
+      reference('pound', 'lb', Dimensional::Unit[:M, :SI, 'gram'], 453.59237, :detector => /\A(pounds?|lbs?|#)\Z/) do # avoirdupois
+        derive('hundredweight', 'cwt', 100, :detector => /\A(hundredweights?|cwt)\Z/) do
+          derive('ton', 't', 20, :detector => /\A(tons?|t)\Z/) do # short ton
             prefer(:displacement)
           end
         end
-        derive('grain', 7000**-1, :detector => /\A(grains?|gr)\Z/, :abbreviation => 'gr') do
-          derive('dram', 27 + Rational(11, 32), :detector => /\A(drams?|dr)\Z/, :abbreviation => 'dr') do
-            derive('ounce', :detector => /\A(ounces?|ozs?)\Z/, :conversion => [437.5, :grain], :abbreviation => 'oz') 
-          end
+        derive('ounce', 'oz', Rational(1, 16), :detector => /\A(ounces?|ozs?)\Z/) 
+        derive('grain', 'gr', Rational(1, 7000), :detector => /\A(grains?|gr)\Z/) do
+          derive('dram', 'dr', 27 + Rational(11, 32), :detector => /\A(drams?|dr)\Z/)
         end
       end
     end
     system(:Imp) do
-      reference('pound', Dimensional::Unit[:M, :SI, 'gram'], 453.59237, :detector => /\A(pounds?|lbs?|#)\Z/, :abbreviation => 'lb') do
-        derive('grain', 7000**-1, :detector => /\A(grains?|gr)\Z/, :abbreviation => 'gr')
-        derive('drachm', 256**-1, :detector => /\A(drachms?|dr)\Z/, :abbreviation => 'dr')
-        derive('ounce', 16**-1, :detector => /\A(ounces?|ozs?)\Z/, :abbreviation => 'oz')
-        derive('stone', 14, :detector => /\A(stones?)\Z/)
-        derive('quarter', 28, :detector => /\A(quarters?)\Z/)
-        derive('hundredweight', 112, :detector => /\A(hundredweights?|cwt)\Z/, :abbreviation => 'cwt')
-        derive('ton', 2240, :detector => /\A(tons?|t)\Z/, :abbreviation => 't') do # long ton
+      reference('pound', 'lb', Dimensional::Unit[:M, :SI, 'gram'], 453.59237, :detector => /\A(pounds?|lbs?|#)\Z/) do
+        derive('grain', 'gr', Rational(1, 7000), :detector => /\A(grains?|gr)\Z/)
+        derive('drachm', 'dr', Rational(1, 256), :detector => /\A(drachms?|dr)\Z/)
+        derive('ounce', 'oz', Rational(1, 16), :detector => /\A(ounces?|ozs?)\Z/)
+        derive('stone', nil, 14, :detector => /\A(stones?)\Z/)
+        derive('quarter', nil, 28, :detector => /\A(quarters?)\Z/)
+        derive('hundredweight', 'cwt', 112, :detector => /\A(hundredweights?|cwt)\Z/)
+        derive('ton', 't', 2240, :detector => /\A(tons?|t)\Z/) do # long ton
           prefer(:displacement)
         end
       end
     end
   end
+
   dimension(:A) do
     system(:SI) do
-      combine('square meter', %w(meter meter).map{|name| Dimensional::Unit[:L, :SI, name]}, :detector => /\A(sq\.?\s?meters?|m2)\Z/, :abbreviation => 'm2') do
-        derive('hectare', 10000, :format => "%.4f%U", :abbreviation => 'ha') do
+      combine('square meter', 'm2', %w(meter meter).map{|name| Dimensional::Unit[:L, :SI, name]}, :detector => /\A(sq\.?\s?meters?|m2)\Z/) do
+        derive('hectare', 'ha', 10000, :format => "%.4f%U") do
           prefer(:forestry, :precision => -4, :format => "%s%U")
         end
       end
     end
     system(:US) do # All measures below are approximations due to the difference between a survey foot and an international foot.
-      combine('square yard', %w(yard yard).map{|name| Dimensional::Unit[:L, :US, name]}, :detector => /yd2/, :abbreviation => 'yd2') do
-        derive('acre', 4840.0)
+      combine('square yard', 'yd2', %w(yard yard).map{|name| Dimensional::Unit[:L, :US, name]}, :detector => /yd2/) do
+        derive('acre', nil, 4840)
       end
-      combine('square mile', %w(mile mile).map{|name| Dimensional::Unit[:L, :US, name]}, :detector => /\A(sq(uare|\.)?\s?miles?)\Z/) do
-        self.alias('section', :detector => /\Asections?\Z/) do
-          derive('township', 36, :detector => /\Atownships?\Z/)
+      combine('square mile', nil, %w(mile mile).map{|name| Dimensional::Unit[:L, :US, name]}, :detector => /\A(sq(uare|\.)?\s?miles?)\Z/) do
+        self.alias('section', nil, :detector => /\Asections?\Z/) do
+          derive('township', 'twp', 36, :detector => /\Atownships?\Z/)
         end
       end
     end
@@ -96,16 +96,16 @@ Dimensional::Configurator.start do
 
   dimension(:V) do
     system(:SI) do
-      combine('cubic meter', %w(meter meter meter).map{|name| Dimensional::Unit[:L, :SI, name]}, :detector => /\A(cubic meters?|m3)\Z/, :abbreviation => "m3") do
-        derive('cubic decimeter', 1e-3, :detector => /\A(cubic decimeters?|dm3)\Z/, :abbreviation => "dm3") do
-          self.alias('liter', :detector => /\A(liters?|l|L)\Z/, :abbreviation => "l") do
-            derive('milliliter', 1E-3, :detector => /\A(milliliters?|ml|mL)\Z/, :abbreviation => "ml")
+      combine('cubic meter', 'm3', %w(meter meter meter).map{|name| Dimensional::Unit[:L, :SI, name]}, :detector => /\A(cubic meters?|m3)\Z/) do
+        derive('cubic decimeter', 'dm3', Rational(1, 1000), :detector => /\A(cubic decimeters?|dm3)\Z/) do
+          self.alias('liter', 'l', :detector => /\A(liters?|l|L)\Z/) do
+            derive('milliliter', 'ml', Rational(1, 1000), :detector => /\A(milliliters?|ml|mL)\Z/)
           end
         end
       end
     end
     system(:Imp) do
-      reference('ounce', Dimensional::Unit[:V, :SI, 'milliliter'], 28.4130625, :detector => /\A((fluid )?ounces?|oz)\Z/, :abbreviation => "fl oz")
+      reference('ounce', 'fl oz', Dimensional::Unit[:V, :SI, 'milliliter'], 28.4130625, :detector => /\A((fluid )?ounces?|oz)\Z/)
       #  register :ounce, :conversion => [28.4130625, :milliliter], :detector => /\A(imperial\s(fluid )?imp\.\sounces?|imp\.\soz)\Z/, :abbreviation => "imp. oz"
       #  register :gill, :conversion => [5, :ounce], :detector => /\A(gills?|gi)\Z/, :abbreviation => "gi"
       #  register :cup, :conversion => [2, :gill], :detector => /\A(cups?)\Z/, :abbreviation => "cp"
@@ -128,12 +128,12 @@ Dimensional::Configurator.start do
     
   dimension(nil) do
     system(:US) do
-      base('each', :detector => /\Aea(ch)?\Z/, :abbreviation => 'ea') do
-        derive('pair', 2, :detector => /\A(pr|pair)\Z/, :abbreviation => 'pr')
-        derive('dozen', 12, :detector => /\A(dz|dozen)\Z/, :abbreviation => 'dz') do
-          derive('gross', 12)
+      base('each', 'ea', :detector => /\Aea(ch)?\Z/) do
+        derive('pair', 'pr', 2, :detector => /\A(pr|pair)\Z/)
+        derive('dozen', 'dz', 12, :detector => /\A(dz|dozen)\Z/) do
+          derive('gross', nil, 12)
         end
-        derive('score', 20)
+        derive('score', nil, 20)
       end
     end
   end

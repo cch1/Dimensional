@@ -56,35 +56,35 @@ module Dimensional
     end
 
     # Register a new base unit
-    def base(name, options = {}, &block)
-      u = register_unit(name, options)
+    def base(name, abbreviation = nil, options = {}, &block)
+      u = unit(name, {:abbreviation => abbreviation})
+      dimension_metric.prefer(u, default_preferences(u).merge(options))
       change_context({:unit => u}, block)
     end
 
     # Register a new derived unit
-    def derive(name, factor, options = {}, &block)
-      options[:reference_factor] = factor
-      options[:reference_unit] = context.unit
-      u = register_unit(name, options)
+    def derive(name, abbreviation, factor, options = {}, &block)
+      u = unit(name, {:abbreviation => abbreviation, :reference_unit => context.unit, :reference_factor => factor})
+      dimension_metric.prefer(u, default_preferences(u).merge(options))
       change_context({:unit => u}, block)
     end
 
     # Register an alias for the unit in context
-    def alias(name, options = {}, &block)
-      derive(name, 1, options, &block)
+    def alias(name, abbreviation = nil, options = {}, &block)
+      derive(name, abbreviation, 1, options, &block)
     end
 
     # Register a new unit in the current context that references an arbitrary unit
-    def reference(name, reference, factor, options = {}, &block)
-      options.merge!(:reference_factor => factor, :reference_unit =>  reference)
-      u = register_unit(name, options)
+    def reference(name, abbreviation, u, f, options = {}, &block)
+      u = unit(name, :abbreviation => abbreviation, :reference_unit => u, :reference_factor => f)
+      dimension_metric.prefer(u, default_preferences(u).merge(options))
       change_context({:unit => u}, block)
     end
 
     # Register a new unit in the current context that is composed of multiple units
-    def combine(name, components, options = {}, &block)
-      options.merge!(:reference_factor => 1, :reference_unit => components)
-      u = register_unit(name, options)
+    def combine(name, abbreviation, components, options = {}, &block)
+      u = unit(name, :abbreviation => abbreviation, :reference_factor => 1, :reference_unit => components)
+      dimension_metric.prefer(u, default_preferences(u).merge(options))
       change_context({:unit => u}, block)
     end
 
@@ -99,14 +99,20 @@ module Dimensional
     end
     
     private
-    def register_unit(name, options)
-      u = Unit.register(name, context.system, context.dimension, options)
-      dimension_metric.prefer(u, options)
-      u
+    def unit(name, options = {})
+      Unit.register(name, context.system, context.dimension, options)
     end
 
     def dimension_metric
       find_or_register_metric(self.class.dimension_default_metric_name(context.dimension), nil)
+    end
+    
+    # Basic preferences for formatting and parsing the given unit
+    def default_preferences(u)
+      o = {}
+      o[:format] = u.dimension.nil? ? "%s %U" : "%s%U"
+      o[:detector] = /\A#{[u.name, u.abbreviation].compact.join('|')}\Z/
+      o
     end
 
     # Register the metric defined by the given key and the current context if it does not already exist.

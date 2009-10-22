@@ -66,7 +66,7 @@ class ConfiguratorTest < Test::Unit::TestCase
         system(:SI) do
           base('meter') do
             test_context.assert uc = context.unit
-            derive('centimeter', 1e-2)
+            derive('centimeter', 'cm', 1e-2)
             test_context.assert_same uc, context.unit
           end
         end
@@ -76,19 +76,21 @@ class ConfiguratorTest < Test::Unit::TestCase
 
   def test_build_base_unit
     Configurator.start(:system => System::SI, :dimension => Dimension::L) do
-      base('meter', :detector => /\A(meters?|m)\Z/, :abbreviation => 'm')
+      base('meter', 'm', :detector => /\A(meters?|m)\Z/)
     end
     assert_instance_of Unit, u = Unit[Dimension::L, System::SI, 'meter']
     assert_same System::SI, u.system
     assert_same Dimension::L, u.dimension
     assert u.base?
-    assert_instance_of Metric, Metric[:L]
+    assert_equal 'm', u.abbreviation
+    assert_instance_of Metric, m = Metric[:L]
+    assert m.preferences(u)[:detector]
   end
 
   def test_build_derived_unit
     Configurator.start(:system => System::SI, :dimension => Dimension::L) do
-      base('meter', :detector => /\A(meters?|m)\Z/, :abbreviation => 'm') do
-        derive('centimeter', 1e-2, :detector => /\A(centimeters?|cm)\Z/, :abbreviation => 'cm')
+      base('meter', 'm', :detector => /\A(meters?|m)\Z/) do
+        derive('centimeter', 'cm', 1e-2, :detector => /\A(centimeters?|cm)\Z/)
       end
     end
     u0 = Unit[Dimension::L, System::SI, 'meter']
@@ -98,12 +100,11 @@ class ConfiguratorTest < Test::Unit::TestCase
     assert_same u0, u.base
     assert_equal 1E-2, u.factor
     assert_equal 'cm', u.abbreviation
-    assert u.match("centimeters")
   end
 
   def test_build_aliased_unit
     Configurator.start(:system => System::SI, :dimension => Dimension::L) do
-      base('meter', :detector => /\A(meters?|m)\Z/, :abbreviation => 'm') do
+      base('meter', 'm', :detector => /\A(meters?|m)\Z/) do
         self.alias('decadecimeter')
       end
     end
@@ -117,9 +118,9 @@ class ConfiguratorTest < Test::Unit::TestCase
 
   def test_build_referenced_unit
     Configurator.start(:system => System::SI, :dimension => Dimension::L) do
-      base('meter', :detector => /\A(meters?|m)\Z/, :abbreviation => 'm')
+      base('meter', 'm', :detector => /\A(meters?|m)\Z/)
       system(:US) do
-        reference('yard', Unit[:L, :SI, 'meter'], 0.9144, :detector => /\A(yards?|yds?)\Z/, :abbreviation => 'yd')
+        reference('yard', 'yd', Unit[:L, :SI, 'meter'], 0.9144, :detector => /\A(yards?|yds?)\Z/)
       end
     end
     u0 = Unit[Dimension::L, System::SI, 'meter']
@@ -130,11 +131,11 @@ class ConfiguratorTest < Test::Unit::TestCase
 
   def test_build_combined_unit
     Configurator.start(:system => System::SI, :dimension => Dimension::L) do
-      base('meter', :detector => /\A(meters?|m)\Z/, :abbreviation => 'm')
+      base('meter', 'm', :detector => /\A(meters?|m)\Z/)
       system(:US) do
-        reference('yard', Unit[:L, :SI, 'meter'], 0.9144, :detector => /\A(yards?|yds?)\Z/, :abbreviation => 'yd')
+        reference('yard', 'yd', Unit[:L, :SI, 'meter'], 0.9144, :detector => /\A(yards?|yds?)\Z/)
         dimension(:A) do
-          combine('square yard', [Unit[:L, :US, 'yard'], Unit[:L, :US, 'yard']], :detector => //, :abbreviation => 'yd2')
+          combine('square yard', 'yd2', [Unit[:L, :US, 'yard'], Unit[:L, :US, 'yard']], :detector => /\A(yd|yard)2\Z/)
         end
       end
     end
@@ -145,9 +146,20 @@ class ConfiguratorTest < Test::Unit::TestCase
     assert_equal [u1.base, u1.base], u.base
   end
   
+  def test_add_default_preferences
+    Configurator.start(:system => System::SI, :dimension => Dimension::L) do
+      base('meter', 'm')
+    end
+    u = Unit[Dimension::L, System::SI, 'meter']
+    m = Metric[:L]
+    assert d = m.preferences(u)[:detector]
+    assert_match d, 'meter'
+    assert f = m.preferences(u)[:format]
+  end
+
   def test_register_metric_options
     Configurator.start(:system => System::SI, :dimension => Dimension::L) do
-      base('meter', :detector => /\A(meters?|m)\Z/, :abbreviation => 'm') do
+      base('meter', 'm', :detector => /\A(meters?|m)\Z/) do
         prefer(:length_over_all, :precision => 0.01)
       end
     end

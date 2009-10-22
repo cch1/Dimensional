@@ -1,7 +1,6 @@
 require 'dimensional/dimension'
 require 'dimensional/system'
 require 'set'
-require 'enumerator'
 
 module Dimensional
   # A standard scale unit for measuring physical quantities.  In addition to the Dimension and System attribute
@@ -33,7 +32,7 @@ module Dimensional
       @store.clear
     end
 
-    attr_reader :name, :abbreviation, :format
+    attr_reader :name, :abbreviation
     attr_reader :system, :dimension
     attr_reader :reference_factor, :reference_unit
 
@@ -43,13 +42,7 @@ module Dimensional
       @dimension = dimension
       @reference_factor = options[:reference_factor]
       @reference_unit = options[:reference_unit]
-      @detector = options[:detector] || /\A#{self.name}\Z/
       @abbreviation = options[:abbreviation]
-      @format = options[:format] || dimension.nil? ? "%s %U" : "%s%U"
-    end
-    
-    def match(s)
-      @detector.match(s)
     end
 
     #  If no reference was provided during initialization, this unit must itself be a base unit.

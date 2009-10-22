@@ -77,13 +77,6 @@ class UnitTest < Test::Unit::TestCase
     assert_equal 1, fathom.convert(fathom)
   end
   
-  def test_match_per_unit
-    u = Unit.new('mile', System::BA, Dimension::L, :detector => /\A(nm|nmi)\Z/)
-    md = u.match('nmi')
-    assert_instance_of MatchData, md 
-    assert_equal 'nmi', md[0]
-  end
-
   def test_identify_commensurable_units
     u0 = Unit.new('mile', System::BA, Dimension::L, :detector => /\A(nm|nmi)\Z/, :abbreviation => 'nm') 
     u1 = Unit.new('cable', System::BA, Dimension::L, :detector => /\A(cables?|cbls?)\Z/, :reference_factor => 1E-1, :reference_unit => u0) 

@@ -22,7 +22,7 @@ module Dimensional
       units = metric.units
       elements = str.to_s.scan(NUMERIC_REGEXP).map do |(v, us)|
         units = units.select{|u| system == u.system} if system
-        unit = us.nil? ? units.first : units.detect{|u| u.match(us)}
+        unit = us.nil? ? units.first : units.detect{|u| metric.preferences(u)[:detector].match(us)}
         raise ArgumentError, "Unit cannot be determined (#{us})" unless unit
         system = unit.system
         value = unit.dimension.nil? ? v.to_i : v.to_f

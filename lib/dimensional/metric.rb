@@ -29,7 +29,7 @@ module Dimensional
     def initialize(name, dimension, parent = nil)
       @name = name && name.to_s
       @dimension = dimension
-      @units = Hash.new{|h,k| h[k] = {}}
+      @units = {}
       @parent = parent
     end
   
@@ -45,7 +45,7 @@ module Dimensional
   
     def preferences(u)
       baseline = parent ? parent.preferences(u) : {} 
-      baseline.merge(@units[u])
+      baseline.merge(@units[u] || {})
     end
     
     # How "preferred" is the given unit for this metric?

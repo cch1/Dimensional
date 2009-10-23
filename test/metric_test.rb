@@ -87,4 +87,13 @@ class MetricTest < Test::Unit::TestCase
     assert length.to_enum.kind_of?(Enumerable::Enumerator)
     assert_respond_to length, :map
   end
+  
+  def test_preferences_query_does_not_modify_preferences
+    draft = Metric.register('draft', Dimension::L)
+    foot = Unit[:L, :BA, 'foot']
+    p0 = draft.preference(foot)
+    draft.preferences(foot)
+    p1 = draft.preference(foot)
+    assert_equal p0, p1
+  end
 end

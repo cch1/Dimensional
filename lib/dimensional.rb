@@ -2,7 +2,7 @@ require 'dimensional/dimension'
 require 'dimensional/system'
 require 'dimensional/unit'
 require 'dimensional/measure'
+require 'dimensional/version'
 
 module Dimensional
-  VERSION = "0.0.5"
 end

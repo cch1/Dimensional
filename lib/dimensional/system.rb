@@ -29,10 +29,11 @@ module Dimensional
       @abbreviation_registry.clear
     end
 
-    attr_reader :name, :abbreviation
+    attr_reader :abbreviation, :description
 
-    def initialize(name, abbreviation = nil)
+    def initialize(name, abbreviation = nil, description = nil)
       @abbreviation = abbreviation && abbreviation.to_s
+      @description = description || name
       super(name)
     end
   end

@@ -13,8 +13,7 @@ module Dimensional
 
     def self.register(*args)
       u = new(*args)
-      raise "Namespace collision: #{u.dimension}:#{u.system}:#{u.name}" if self[u.dimension, u.system, u.name.to_sym]
-      raise "Namespace collision: #{u.dimension}:#{u.system}:#{u.abbreviation}" if self[u.dimension, u.system, u.abbreviation.to_sym] if u.abbreviation
+      raise "Namespace collision: #{u.inspect}" if @store.include?(u)
       @store << u
       u
     end
@@ -68,11 +67,26 @@ module Dimensional
       return 1 if self == other
       self.factor / other.factor
     end
-    
+
     def commensurable?(other)
       dimension == other.dimension
     end
-    
+
+    # Equality is determined by equality of value-ish attributes.  Specifically, equal factors relative to the same base.
+    def ==(other)
+      other.base.equal?(self.base) && other.factor == self.factor
+    end
+
+    # Hashing collisions are desired when we have same identity-defining attributes.
+    def eql?(other)
+      other.kind_of?(self.class) && other.dimension.eql?(self.dimension) && other.system.eql?(self.system) && other.name.eql?(self.name)
+    end
+
+    # This is pretty lame, but the expected usage means we shouldn't get penalized
+    def hash
+      [self.class, dimension, system, name].hash
+    end
+
     def to_s
       name rescue super
     end

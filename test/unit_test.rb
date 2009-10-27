@@ -78,18 +78,40 @@ class UnitTest < Test::Unit::TestCase
   end
   
   def test_identify_commensurable_units
-    u0 = Unit.new('mile', System::BA, Dimension::L, :detector => /\A(nm|nmi)\Z/, :abbreviation => 'nm') 
-    u1 = Unit.new('cable', System::BA, Dimension::L, :detector => /\A(cables?|cbls?)\Z/, :reference_factor => 1E-1, :reference_unit => u0) 
+    u0 = Unit.new('mile', System::BA, Dimension::L, :abbreviation => 'nm') 
+    u1 = Unit.new('cable', System::BA, Dimension::L, :reference_factor => 1E-1, :reference_unit => u0) 
     u2 = Unit.new('ton', System::BA, Dimension::M, :abbreviation => 't')
     assert u0.commensurable?(u1)
     assert !u0.commensurable?(u2)
   end
 
   def test_identify_commensurable_composed_units
-    u0 = Unit.new('mile', System::BA, Dimension::L, :detector => /\A(nm|nmi)\Z/, :abbreviation => 'nm') 
-    u1 = Unit.new('cable', System::BA, Dimension::L, :detector => /\A(cables?|cbls?)\Z/, :reference_factor => 1E-1, :reference_unit => u0) 
+    u0 = Unit.new('mile', System::BA, Dimension::L, :abbreviation => 'nm') 
+    u1 = Unit.new('cable', System::BA, Dimension::L, :reference_factor => 1E-1, :reference_unit => u0) 
     u2 = Unit.new('ton', System::BA, Dimension::M, :abbreviation => 't')
     assert u0.commensurable?(u1)
     assert !u0.commensurable?(u2)
+  end
+  
+  def test_identity
+    u0 = Unit.new('mile', System::BA, Dimension::L)
+    u1 = Unit.new('mile', System::BA, Dimension::L)
+    u2 = Unit.new('statute mile', System::BA, Dimension::L)
+    # u0 and u1 are effectively identical and should collide in hashes
+    assert_same u0.hash, u1.hash
+    assert u0.eql?(u1)
+    # u0 and u2 are distinct and should not collide in hashes
+    assert_not_same u0.hash, u2.hash
+    assert !u0.eql?(u2)
+  end
+
+  def test_equality
+    u0 = Unit.new('mile', System::BA, Dimension::L)
+    u1 = Unit.new('sea mile', System::BA, Dimension::L, :reference_factor => 1, :reference_unit => u0)
+    u2 = Unit.new('mile', System::BA, Dimension::L, :reference_factor => 0.93, :reference_unit => u0) # modern approximation
+    # u0 and u1 have the same value but different identities
+    assert_equal u0, u1
+    # u0 and u2 have the same identity but different values
+    assert_not_equal u0, u2
   end
 end

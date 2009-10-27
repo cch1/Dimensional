@@ -52,4 +52,29 @@ class DimensionTest < Test::Unit::TestCase
   def test_return_nil_on_nil_lookup
     assert_nil Dimension[nil]
   end
+
+  def test_identity
+    d0 = Dimension.new("Length", 'L')
+    d1 = Dimension.new("Length", 'l')
+    d2 = Dimension.new("Temperature", 'Q')
+    # d0 and d1 are effectively identical and should collide in hashes
+    assert_same d0.hash, d1.hash
+    assert d0.eql?(d1)
+    # d0 and d2 are distinct and should not collide in hashes
+    assert_not_same d0.hash, d2.hash
+    assert !d0.eql?(d2)
+  end
+
+  def test_equality
+    length = Dimension.new("Length")
+    mass = Dimension.new("Mass")
+    time = Dimension.new("Time")
+    d0 = Dimension.new("Weight", nil, {mass => 1, length => 1, time => -2})
+    d1 = Dimension.new("Force", nil, {mass => 1, length => 1, time => -2})
+    d2 = Dimension.new("Weight", nil, {mass => 1}) # For the physics-challenged out there, pay attention!
+    # d0 and d1 have the same value but different identities
+    assert_equal d0, d1
+    # d0 and d3 have the same identity but different values
+    assert_not_equal d0, d2
+  end
 end

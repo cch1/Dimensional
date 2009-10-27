@@ -8,8 +8,8 @@ module Dimensional
 
     def self.register(*args)
       d = new(*args)
-      raise "Dimension #{d.name} already exists" if @registry[d.name]
-      raise "Dimension #{d.name}'s symbol already exists" if @symbol_registry[d.symbol]
+      raise "Dimension #{d} already exists" if @registry.values.include?(d)
+      raise "Dimension #{d}'s symbol already exists" if @symbol_registry[d.symbol]
       @registry[d.name.to_sym] = d
       @symbol_registry[d.symbol.to_sym] = d
       const_set(d.symbol.to_s, d) rescue nil # Not all symbols strings are valid constant names
@@ -43,6 +43,22 @@ module Dimensional
     
     def fundamental?
       exponents.empty?
+    end
+
+    # Equality is determined by equality of value-ish attributes.  Specifically, equal exponents for non-fundamental units
+    # and identicality for fundamental units.  The nil dimension is inherently un-equal to any non-nil dimension.
+    def ==(other)
+      other && ((fundamental? && other.fundamental?) ? eql?(other) : other.exponents == self.exponents)
+    end
+
+    # Hashing collisions are desired when we have same identity-defining attributes.
+    def eql?(other)
+      other.kind_of?(self.class) && other.name.eql?(self.name)
+    end
+
+    # This is pretty lame, but the expected usage means we shouldn't get penalized
+    def hash
+      [self.class, name].hash
     end
 
     def to_s

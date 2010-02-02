@@ -29,26 +29,27 @@ module Dimensional
       @symbol_registry.clear
     end
 
-    attr_reader :exponents, :name, :symbol
+    attr_reader :name, :symbol, :basis
 
-    def initialize(name, symbol = nil, exponents = {})
-      exponents.each_pair do |k,v|
+    def initialize(name, symbol = nil, basis = {})
+      basis.each_pair do |k,v|
         raise "Invalid fundamental dimension #{k}" unless k.fundamental?
-        raise "Invalid exponent #{v}" unless v.kind_of?(Integer)  # Can't this really be any Rational?
+        raise "Invalid exponent for basis member #{v}" unless v.kind_of?(Integer)  # Can't this really be any Rational?
       end
-      @exponents = Hash.new(0).merge(exponents)
+      @basis = Hash.new(0).merge(basis)
       @name = name.to_s
       @symbol = symbol.nil? ? name.to_s.slice(0, 1).upcase : symbol.to_s
     end
     
     def fundamental?
-      exponents.empty?
+      basis.empty?
     end
+    alias base? fundamental?
 
-    # Equality is determined by equality of value-ish attributes.  Specifically, equal exponents for non-fundamental units
+    # Equality is determined by equality of value-ish attributes.  Specifically, equal basis for non-fundamental units
     # and identicality for fundamental units.  The nil dimension is inherently un-equal to any non-nil dimension.
     def ==(other)
-      other && ((fundamental? && other.fundamental?) ? eql?(other) : other.exponents == self.exponents)
+      other.kind_of?(self.class) && ((fundamental? && other.fundamental?) ? eql?(other) : other.basis == basis)
     end
 
     # Hashing collisions are desired when we have same identity-defining attributes.

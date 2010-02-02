@@ -13,15 +13,15 @@ class DimensionTest < Test::Unit::TestCase
     assert d.fundamental?
     assert_equal 'Mass', d.name
     assert_equal 'M', d.symbol
-    assert_equal Hash.new, d.exponents
+    assert_equal Hash.new, d.basis
   end
 
   def test_create_new_composite_dimension
     l = Dimension.new('Length')
     assert_instance_of Dimension, a = Dimension.new('Hyperspace', 'H4', {l => 4})
     assert !a.fundamental?
-    assert a.exponents.has_key?(l)
-    assert_equal 4, a.exponents[l]
+    assert a.basis.has_key?(l)
+    assert_equal 4, a.basis[l]
   end
 
   def test_register_new_dimension

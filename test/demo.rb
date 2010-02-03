@@ -30,7 +30,6 @@ Configurator.start do
     system(:US) do # As of 1 July 1959 (http://en.wikipedia.org/wiki/United_States_customary_units#Units_of_length)
       reference('yard', 'yd', Unit[:L, :SI, 'meter'], 0.9144, :detector => /\A(yards?|yds?)\Z/) do
         derive('foot', 'ft', Rational(1,3), :detector => /\A(foot|feet|ft|')\Z/, :format => "%p'") do
-          prefer(:hull)
           derive('inch', 'in', Rational(1,12), :detector => /\A(inch|inches|in|")\Z/, :format => "%p\"")
         end
         derive('furlong', nil, 220, :detector => /\A(furlongs?)\Z/) do
@@ -43,7 +42,6 @@ Configurator.start do
     system(:SI) do
       base('kilogram', 'kg', :detector => /\A(kilograms?|kg)\Z/) do
         derive('tonne', 't', 1000, :detector => /\A(tonnes?)\Z/) do # metric ton
-          prefer(:displacement)
         end
         derive('gram', 'g', Rational(1, 1000), :detector => /\A(grams?|g)\Z/)
       end
@@ -52,7 +50,6 @@ Configurator.start do
       reference('pound', 'lb', Unit[:M, :SI, 'gram'], 453.59237, :detector => /\A(pounds?|lbs?|#)\Z/) do # avoirdupois
         derive('hundredweight', 'cwt', 100, :detector => /\A(hundredweights?|cwt)\Z/) do
           derive('ton', 't', 20, :detector => /\A(tons?|t)\Z/) do # short ton
-            prefer(:displacement)
           end
         end
         derive('ounce', 'oz', Rational(1, 16), :detector => /\A(ounces?|ozs?)\Z/)
@@ -70,7 +67,6 @@ Configurator.start do
         derive('quarter', nil, 28, :detector => /\A(quarters?)\Z/)
         derive('hundredweight', 'cwt', 112, :detector => /\A(hundredweights?|cwt)\Z/)
         derive('ton', 't', 2240, :detector => /\A(tons?|t)\Z/) do # long ton
-          prefer(:displacement)
         end
       end
     end
@@ -80,7 +76,6 @@ Configurator.start do
     system(:SI) do
       combine('square meter', 'm2', %w(meter meter).map{|name| Unit[:L, :SI, name]}, :detector => /\A(sq\.?\s?meters?|m2)\Z/) do
         derive('hectare', 'ha', 10000, :format => "%.4f%U") do
-          prefer(:forestry, :precision => -4, :format => "%s%U")
         end
       end
     end
@@ -134,7 +129,6 @@ Configurator.start do
         derive('minute', 'm', 60, :detector => /\A(minutes?|m)\Z/) do
           derive('hour', 'h', 60, :detector => /\A(hours?|h)\Z/) do
             derive('day', 'd', 24, :detector => /\A(days?)\Z/) do
-              prefer(:term, :format => "%.0f%U", :precision => -2)
               derive('week', 'w', 7, :detector => /\A(weeks?|wks?)\Z/)
               derive('year', 'yr', 365 + Rational(1, 4), :detector => /\A(years?|yrs?)\Z/)
             end

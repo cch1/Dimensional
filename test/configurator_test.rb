@@ -17,7 +17,6 @@ class ConfiguratorTest < Test::Unit::TestCase
     Dimension.reset!
     System.reset!
     Unit.reset!
-    Metric.reset!
   end
 
   def test_create_configurator
@@ -47,7 +46,7 @@ class ConfiguratorTest < Test::Unit::TestCase
       test_context.assert_nil context.dimension
     end
   end
-  
+
   def test_change_system_context_for_duration_of_block
     test_context = self
     Configurator.start do
@@ -83,8 +82,6 @@ class ConfiguratorTest < Test::Unit::TestCase
     assert_same Dimension::L, u.dimension
     assert u.base?
     assert_equal 'm', u.abbreviation
-    assert_instance_of Metric, m = Metric[:L]
-    assert m.preferences(u)[:detector]
   end
 
   def test_build_derived_unit
@@ -144,28 +141,5 @@ class ConfiguratorTest < Test::Unit::TestCase
     assert_equal Dimension::A, u.dimension
     assert_equal 0.83612736, u.factor
     assert_equal [u1.base, u1.base], u.base
-  end
-  
-  def test_add_default_preferences
-    Configurator.start(:system => System::SI, :dimension => Dimension::L) do
-      base('meter', 'm')
-    end
-    u = Unit[Dimension::L, System::SI, 'meter']
-    m = Metric[:L]
-    assert d = m.preferences(u)[:detector]
-    assert_match d, 'meter'
-    assert f = m.preferences(u)[:format]
-  end
-
-  def test_register_metric_options
-    Configurator.start(:system => System::SI, :dimension => Dimension::L) do
-      base('meter', 'm', :detector => /\A(meters?|m)\Z/) do
-        prefer(:length_over_all, :precision => 0.01)
-      end
-    end
-    u = Unit[:L, :SI, 'm']
-    assert_instance_of Metric, m = Metric[:length_over_all]
-    assert_same Metric[:L], m.parent
-    assert_equal 0.01, m.preferences(u)[:precision]
   end
 end

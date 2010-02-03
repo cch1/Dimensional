@@ -8,7 +8,7 @@ module Dimensional
   # to a local variable if they have the same name -it can subtly goof things up.
   class Configurator
     # A simple container for holding a context for definition, parsing and formatting of dimensional data
-    Context = Struct.new(:system, :dimension, :unit) do 
+    Context = Struct.new(:system, :dimension, :unit) do
       def valid?
         true
       end
@@ -58,14 +58,12 @@ module Dimensional
     # Register a new base unit
     def base(name, abbreviation = nil, options = {}, &block)
       u = unit(name, {:abbreviation => abbreviation})
-      dimension_metric.prefer(u, default_preferences(u).merge(options))
       change_context({:unit => u}, block)
     end
 
     # Register a new derived unit
     def derive(name, abbreviation, factor, options = {}, &block)
       u = unit(name, {:abbreviation => abbreviation, :reference_unit => context.unit, :reference_factor => factor})
-      dimension_metric.prefer(u, default_preferences(u).merge(options))
       change_context({:unit => u}, block)
     end
 
@@ -77,47 +75,22 @@ module Dimensional
     # Register a new unit in the current context that references an arbitrary unit
     def reference(name, abbreviation, u, f, options = {}, &block)
       u = unit(name, :abbreviation => abbreviation, :reference_unit => u, :reference_factor => f)
-      dimension_metric.prefer(u, default_preferences(u).merge(options))
       change_context({:unit => u}, block)
     end
 
     # Register a new unit in the current context that is composed of multiple units
     def combine(name, abbreviation, components, options = {}, &block)
       u = unit(name, :abbreviation => abbreviation, :reference_factor => 1, :reference_unit => components)
-      dimension_metric.prefer(u, default_preferences(u).merge(options))
       change_context({:unit => u}, block)
-    end
-
-    # Register preferred options for the current unit in the named metric
-    def prefer(name, options = {})
-      m = find_or_register_metric(name, dimension_metric)
-      m.prefer(context.unit, options)
     end
 
     def to_s
       context.to_s
     end
-    
+
     private
     def unit(name, options = {})
       Unit.register(name, context.system, context.dimension, options)
-    end
-
-    def dimension_metric
-      find_or_register_metric(self.class.dimension_default_metric_name(context.dimension), nil)
-    end
-    
-    # Basic preferences for formatting and parsing the given unit
-    def default_preferences(u)
-      o = {}
-      o[:format] = u.dimension.nil? ? "%s %U" : "%s%U"
-      o[:detector] = /\A#{[u.name, u.abbreviation].compact.join('|')}\Z/
-      o
-    end
-
-    # Register the metric defined by the given key and the current context if it does not already exist.
-    def find_or_register_metric(name, parent = nil)
-      Metric[name] || Metric.register(name, context.dimension, parent)
     end
   end
 end

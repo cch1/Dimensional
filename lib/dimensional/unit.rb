@@ -6,10 +6,16 @@ module Dimensional
   # A standard scale unit for measuring physical quantities.  In addition to the Dimension and System attribute
   # that are well-defined by classes above, the user-defined metric attribute is available to identify units as
   # belonging to an arbitrary metric like length, draft or property size.  Effective use of the metric attribute
-  # can simplify presentation of Measures and make parsing of user input more accurate. 
+  # can simplify presentation of Measures and make parsing of user input more accurate.
   # Reference: http://en.wikipedia.org/wiki/Units_of_measurement
   class Unit
+    extend Enumerable
+
     @store = Set.new
+
+    def self.each(&block)
+      @store.each(&block)
+    end
 
     def self.register(*args)
       u = new(*args)
@@ -34,6 +40,7 @@ module Dimensional
     attr_reader :name, :abbreviation
     attr_reader :system, :dimension
     attr_reader :reference_factor, :reference_unit
+    attr_reader :detector, :format, :preference
 
     def initialize(name, system, dimension, options = {})
       @name = name.to_s
@@ -42,6 +49,9 @@ module Dimensional
       @reference_factor = options[:reference_factor]
       @reference_unit = options[:reference_unit]
       @abbreviation = options[:abbreviation]
+      @detector = options[:detector] || /\A#{[name, abbreviation].compact.join('|')}\Z/
+      @format = options[:format] || dimension.nil? ? "%s %U" : "%s%U"
+      @preference = options[:preference] || 1
     end
 
     #  If no reference was provided during initialization, this unit must itself be a base unit.
@@ -54,13 +64,13 @@ module Dimensional
       return self if base?
       @base ||= reference_unit.kind_of?(Enumerable) ? reference_unit.map{|ru| ru.base} : reference_unit.base
     end
-    
+
     # The conversion factor relative to the base unit.
     def factor
       return 1 if base?
       @factor ||= reference_factor * (reference_unit.kind_of?(Enumerable) ? reference_unit.inject(1){|f, ru| f * ru.factor} : reference_unit.factor)
     end
-    
+
     # Returns the conversion factor to convert to the other unit
     def convert(other)
       raise "Units #{self} and #{other} are not commensurable" unless commensurable?(other)
@@ -90,7 +100,7 @@ module Dimensional
     def to_s
       name rescue super
     end
-    
+
     def inspect
       "#<#{self.class.inspect}: #{dimension.to_s}:#{system.to_s}:#{to_s}>"
     end

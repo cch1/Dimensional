@@ -75,13 +75,14 @@ class ConfiguratorTest < Test::Unit::TestCase
 
   def test_build_base_unit
     Configurator.start(:system => System::SI, :dimension => Dimension::L) do
-      base('meter', 'm', :detector => /\A(meters?|m)\Z/)
+      base('meter', 'm', :detector => /\A(met(er|re)s?|m)\Z/)
     end
     assert_instance_of Unit, u = Unit[Dimension::L, System::SI, 'meter']
     assert_same System::SI, u.system
     assert_same Dimension::L, u.dimension
     assert u.base?
     assert_equal 'm', u.abbreviation
+    assert_equal /\A(met(er|re)s?|m)\Z/, u.detector
   end
 
   def test_build_derived_unit

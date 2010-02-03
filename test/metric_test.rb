@@ -66,6 +66,15 @@ class MetricTest < Test::Unit::TestCase
     assert_equal @fathom, m.unit
   end
 
+  def test_create_new_metric_with_default_unit
+    frontage = Class.new(Metric)
+    frontage.dimension = Dimension::L
+    frontage.default = Unit[:L, :US, :yard]
+    assert m = frontage.new(200)
+    assert_equal 200, m
+    assert_equal @yard_us, m.unit
+  end
+
   def test_find_unit
     depth = Class.new(Metric)
     depth.dimension = Dimension::L

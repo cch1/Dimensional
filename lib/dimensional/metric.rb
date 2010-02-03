@@ -62,7 +62,8 @@ module Dimensional
     end
 
     attr_reader :unit
-    def initialize(value, unit)
+    def initialize(value, unit = self.class.default)
+      raise ArgumentError, "No default unit set" unless unit
       @unit = unit
       super(value)
     end

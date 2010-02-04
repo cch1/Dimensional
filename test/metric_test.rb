@@ -235,7 +235,7 @@ class MetricTest < Test::Unit::TestCase
     depth = Class.new(Metric)
     depth.dimension = Dimension::L
     m = depth.parse("15ft4in", :BA)
-    assert_equal "15.33 (ft)\t%\t<15.3333333ft>", m.strfmeasure("%4.2f (%U)\t%%\t<%.10s%U>")
+    assert_equal "15.33 (ft)\t%\t<15.3333333ft>", m.strfmeasure("%4.2f (%U)\t%%\t<%10.7f%U>")
   end
 
   def test_precision_recognition

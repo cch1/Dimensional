@@ -48,7 +48,7 @@ module Dimensional
           unit = us.nil? ? default : find_unit(us, system)
           raise ArgumentError, "Unit cannot be determined (#{us})" unless unit
           system = unit.system # Set the system to restrict subsequent filtering
-          value = unit.dimension.nil? ? v.to_i : v.to_f # Ugly...
+          value = Integer(v) rescue Float(v)
           new(value, unit)
         end
         # Coalesce the elements into a single Measure instance in "expression base" units.
@@ -116,12 +116,12 @@ module Dimensional
     # All other specifiers are applied to the numeric value of the measure.
     # TODO: Support modulo subordinate units with format hash -> {1 => "'", 12 => :inch} or {1 => "%d#", 16 => "%doz."}
     def strfmeasure(format)
-      # We need the native value to prevent infinite recursion if the user specifies the %s specifier.
       v = if (precision = self.class.configuration[unit][:precision])
+        # TODO: This precision could more usefully be converted to "signifigant digits"
         pfactor = 10**(-precision)
         ((self * pfactor).round / pfactor.to_f)
       else
-        __getobj__
+        __getobj__ # We need the native value to prevent infinite recursion if the user specifies the %s specifier.
       end
       format = format.gsub(/%(#)?([\d.\-\*]*)U/) do |s|
         us = ($1) ? unit.name : (unit.abbreviation || unit.name)

@@ -11,6 +11,7 @@ class UnitTest < Test::Unit::TestCase
     Dimension.register('Length')
     Dimension.register('Mass')
     Dimension.register('Force')
+    Dimension.register('Area', 'A', {Dimension::L => 4})
   end
 
   def teardown
@@ -24,7 +25,7 @@ class UnitTest < Test::Unit::TestCase
     assert_same System::BA, u.system
     assert_same Dimension::L, u.dimension
     assert u.base?
-    assert_same u, u.base
+    assert_equal({u => 1}, u.base)
     assert_same 1, u.factor
   end
 
@@ -40,18 +41,28 @@ class UnitTest < Test::Unit::TestCase
 
   def test_create_new_derived_unit
     cable = Unit.new('cable', System::BA, Dimension::L, {})
-    assert_instance_of Unit, u = Unit.new('fathom', System['BA'], Dimension['L'], :reference_factor => 1E-1, :reference_unit => cable)
+    assert_instance_of Unit, u = Unit.new('fathom', System['BA'], Dimension['L'], :reference_factor => 1E-1, :reference_units => {cable => 1})
     assert !u.base?
-    assert_same cable, u.base
+    t = u.base
+    assert_equal({cable => 1}, t)
     assert_equal 1E-1, u.factor
   end
 
   def test_create_new_combined_unit
     meter = Unit.new('meter', System::SI, Dimension::L, {})
-    assert_instance_of Unit, u = Unit.new('square meter', System::SI, Dimension::L, :reference_factor => 1, :reference_unit => [meter, meter])
+    assert_instance_of Unit, u = Unit.new('square meter', System::SI, Dimension::L, :reference_factor => 1, :reference_units => {meter => 2})
     assert !u.base?
-    assert_equal [meter, meter], u.base
+    assert_equal({meter => 2}, u.base)
     assert_equal 1, u.factor
+  end
+
+  def test_create_new_combined_with_derived_unit_and_big_exponents
+    meter = Unit.new('meter', System::SI, Dimension::L, {})
+    assert_instance_of Unit, yard = Unit.new('yard', System::US, Dimension::L, :reference_factor => 0.9144, :reference_units => {meter => 1})
+    assert_instance_of Unit, yard2 = Unit.new('square yard', System::SI, Dimension::A, :reference_factor => 1, :reference_units => {yard => 2})
+    assert !yard2.base?
+    assert_equal({meter => 2}, yard2.base)
+    assert_equal 0.83612736, yard2.factor
   end
 
   def test_regsiter_new_unit
@@ -68,10 +79,19 @@ class UnitTest < Test::Unit::TestCase
 
   def test_lookup_unit_with_symbols
     u = Unit.register('fathom', System::BA, Dimension::L, {:abbreviation => 'fm'})
-    assert_nil Unit[:L, :SI, 'fathom']
-    assert_nil Unit[:M, :BA, 'fathom']
-    assert_nil Unit[:L, :BA, 'somethingelse']
     assert_same u, Unit[:L, :BA, 'fathom']
+  end
+
+  def test_lookup_failure
+    assert_raises ArgumentError do
+      Unit[:L, :SI, 'fathom']
+    end
+    assert_raises ArgumentError do
+      Unit[:M, :BA, 'fathom']
+    end
+    assert_raises ArgumentError do
+      Unit[:L, :BA, 'somethingelse']
+    end
   end
 
   def test_convert
@@ -112,8 +132,8 @@ class UnitTest < Test::Unit::TestCase
 
   def test_equality
     u0 = Unit.new('mile', System::BA, Dimension::L)
-    u1 = Unit.new('sea mile', System::BA, Dimension::L, :reference_factor => 1, :reference_unit => u0)
-    u2 = Unit.new('mile', System::BA, Dimension::L, :reference_factor => 0.93, :reference_unit => u0) # modern approximation
+    u1 = Unit.new('sea mile', System::BA, Dimension::L, :reference_factor => 1, :reference_units => {u0 => 1})
+    u2 = Unit.new('mile', System::BA, Dimension::L, :reference_factor => 0.93, :reference_units => {u0 => 1}) # modern approximation
     # u0 and u1 have the same value but different identities
     assert_equal u0, u1
     # u0 and u2 have the same identity but different values

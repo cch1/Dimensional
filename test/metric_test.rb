@@ -14,27 +14,27 @@ class MetricTest < Test::Unit::TestCase
     System.register('International System of Units', 'SI')
     # Length Units - SI
     @meter = Unit.register('meter', System::SI, Dimension::L, {:abbreviation => 'm'})
-    @kilometer = Unit.register('kilometer', System::SI, Dimension::L, {:reference_unit => @meter, :reference_factor => 1000, :abbreviation => 'km'})
-    @centimeter = Unit.register('centimeter', System::SI, Dimension::L, {:reference_unit => @meter, :reference_factor => Rational(1,100), :abbreviation => 'cm'})
+    @kilometer = Unit.register('kilometer', System::SI, Dimension::L, {:reference_units => {@meter => 1}, :reference_factor => 1000, :abbreviation => 'km'})
+    @centimeter = Unit.register('centimeter', System::SI, Dimension::L, {:reference_units => {@meter => 1}, :reference_factor => Rational(1,100), :abbreviation => 'cm'})
     # Length Units - US
-    @yard_us = Unit.register('yard', System::US, Dimension::L, {:reference_unit => @meter, :reference_factor => 0.9144, :abbreviation => 'yd'})
-    @foot_us = Unit.register('foot', System::US, Dimension::L, {:reference_unit => @yard_us, :reference_factor => Rational(1,3), :abbreviation => 'ft'})
-    @mile_us = Unit.register('mile', System::US, Dimension::L, {:reference_unit => @foot_us, :reference_factor => 5280, :abbreviation => 'mi'})
-    @inch_us = Unit.register('inch', System::US, Dimension::L, {:reference_unit => @foot_us, :reference_factor => Rational(1,12), :abbreviation => 'in'})
+    @yard_us = Unit.register('yard', System::US, Dimension::L, {:reference_units => {@meter => 1}, :reference_factor => 0.9144, :abbreviation => 'yd'})
+    @foot_us = Unit.register('foot', System::US, Dimension::L, {:reference_units => {@yard_us => 1}, :reference_factor => Rational(1,3), :abbreviation => 'ft'})
+    @mile_us = Unit.register('mile', System::US, Dimension::L, {:reference_units => {@foot_us => 1}, :reference_factor => 5280, :abbreviation => 'mi'})
+    @inch_us = Unit.register('inch', System::US, Dimension::L, {:reference_units => {@foot_us => 1}, :reference_factor => Rational(1,12), :abbreviation => 'in'})
     # Length Units - BA
     @nautical_mile = Unit.register('mile', System::BA, Dimension::L, {:abbreviation => 'nm'})
-    @cable = Unit.register('cable', System::BA, Dimension::L, {:reference_unit => @nautical_mile, :reference_factor => Rational(1,10)})
-    @fathom = Unit.register('fathom', System::BA, Dimension::L, {:reference_unit => @cable, :reference_factor => Rational(1,10), :abbreviation => 'fm'})
-    @yard_ba = Unit.register('yard', System::BA, Dimension::L, {:reference_unit => @fathom, :reference_factor => Rational(1,6), :abbreviation => 'yd'})
-    @foot_ba = Unit.register('foot', System::BA, Dimension::L, {:reference_unit => @yard_ba, :reference_factor => Rational(1,3), :abbreviation => 'ft'})
-    @inch_ba = Unit.register('inch', System::BA, Dimension::L, {:reference_unit => @foot_ba, :reference_factor => Rational(1,12), :abbreviation => 'in'})
+    @cable = Unit.register('cable', System::BA, Dimension::L, {:reference_units => {@nautical_mile => 1}, :reference_factor => Rational(1,10)})
+    @fathom = Unit.register('fathom', System::BA, Dimension::L, {:reference_units => {@cable => 1}, :reference_factor => Rational(1,10), :abbreviation => 'fm'})
+    @yard_ba = Unit.register('yard', System::BA, Dimension::L, {:reference_units => {@fathom => 1}, :reference_factor => Rational(1,6), :abbreviation => 'yd'})
+    @foot_ba = Unit.register('foot', System::BA, Dimension::L, {:reference_units => {@yard_ba => 1}, :reference_factor => Rational(1,3), :abbreviation => 'ft'})
+    @inch_ba = Unit.register('inch', System::BA, Dimension::L, {:reference_units => {@foot_ba => 1}, :reference_factor => Rational(1,12), :abbreviation => 'in'})
     # Mass Units
     @pound_mass = Unit.register('pound', System::US, Dimension::M, {:abbreviation => 'lb'})
     # Force Units
     @pound_force = Unit.register('pound', System::US, Dimension::F, {:abbreviation => 'ft'})
     # Dimensionless Units
     @each = Unit.register('each', System::US, nil, {:abbreviation => 'ea'})
-    @dozen = Unit.register('dozen', System::US, nil, {:reference_unit => @each, :reference_factor => 12, :abbreviation => 'dz'})
+    @dozen = Unit.register('dozen', System::US, nil, {:reference_units => {@each => 0}, :reference_factor => 12, :abbreviation => 'dz'})
   end
 
   def teardown
@@ -203,13 +203,13 @@ class MetricTest < Test::Unit::TestCase
     assert_same @kilometer, m1.unit
   end
 
-  def test_return_base
+  def test_convert_to_base
     range = Class.new(Metric)
     range.dimension = Dimension::L
     range.base = @nautical_mile
     b = range.new(1, @fathom).base
     assert_in_delta(1e-2, b, 0.000001)
-    assert_same @fathom.base, b.unit
+    assert_same @nautical_mile, b.unit
   end
 
   def test_stringify_with_abbreviation

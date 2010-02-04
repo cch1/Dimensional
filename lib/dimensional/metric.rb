@@ -99,7 +99,6 @@ module Dimensional
 
     # Return a new metric expressed in the base unit
     def base
-      raise "Composed units cannot be converted to a base unit" if unit.reference_unit.kind_of?(Enumerable)
       raise "No base unit defined" unless self.class.base
       convert(self.class.base)
     end

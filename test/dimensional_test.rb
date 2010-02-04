@@ -28,4 +28,37 @@ class DimensionalTest < Test::Unit::TestCase
       assert_equal "0.4047ha", m2.to_s
     end
   end
+
+  def test_engine_displacement
+    assert m = EngineDisplacement.parse('5.7l')
+    assert_equal 5.7, m
+    assert_same Unit[:V, :SI, 'liter'], m.unit
+    m = m.change_system(:US)
+    assert_in_delta 347, m, 1
+    assert_same Unit[:V, :US, 'in3'], m.unit
+  end
+
+  def test_mechanical_power
+    assert m = MechanicalPower.parse('430hp')
+    assert_equal 430, m
+    assert_same Unit[:P, :US, :hp], m.unit
+    m = m.change_system(:SI)
+    assert_in_delta 320, m, 1
+    assert_same Unit[:P, :SI, :kW], m.unit
+  end
+
+  def test_speed
+    speed = Class.new(Metric)
+    speed.instance_eval do
+      self.dimension = Dimension::Vel
+      self.default = Unit[:Vel, :SI, :"km/h"]
+      self.base = default
+    end
+    assert m = speed.parse('20 knots')
+    assert_equal 20, m
+    assert_same Unit[:Vel, :BA, 'knot'], m.unit
+    m = m.change_system(:US)
+    assert_in_delta 23, m, 0.1
+    assert_same Unit[:Vel, :US, 'mph'], m.unit
+  end
 end

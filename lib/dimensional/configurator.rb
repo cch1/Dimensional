@@ -57,13 +57,13 @@ module Dimensional
 
     # Register a new base unit
     def base(name, abbreviation = nil, options = {}, &block)
-      u = unit(name, options.merge({:abbreviation => abbreviation}))
+      u = unit(name, {:abbreviation => abbreviation}.merge(options))
       change_context({:unit => u}, block)
     end
 
     # Register a new derived unit
     def derive(name, abbreviation, factor, options = {}, &block)
-      u = unit(name, options.merge({:abbreviation => abbreviation, :reference_unit => context.unit, :reference_factor => factor}))
+      u = unit(name, {:abbreviation => abbreviation, :reference_units => {context.unit => 1}, :reference_factor => factor}.merge(options))
       change_context({:unit => u}, block)
     end
 
@@ -73,14 +73,14 @@ module Dimensional
     end
 
     # Register a new unit in the current context that references an arbitrary unit
-    def reference(name, abbreviation, u, f, options = {}, &block)
-      u = unit(name, options.merge(:abbreviation => abbreviation, :reference_unit => u, :reference_factor => f))
+    def reference(name, abbreviation, ru, f, options = {}, &block)
+      u = unit(name, {:abbreviation => abbreviation, :reference_units => {ru => 1}, :reference_factor => f}.merge(options))
       change_context({:unit => u}, block)
     end
 
     # Register a new unit in the current context that is composed of multiple units
     def combine(name, abbreviation, components, options = {}, &block)
-      u = unit(name, options.merge(:abbreviation => abbreviation, :reference_factor => 1, :reference_unit => components))
+      u = unit(name, {:abbreviation => abbreviation, :reference_factor => 1, :reference_units => components}.merge(options))
       change_context({:unit => u}, block)
     end
 

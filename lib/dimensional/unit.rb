@@ -53,7 +53,7 @@ module Dimensional
       @abbreviation = options[:abbreviation]
       @detector = options[:detector] || /\A#{[name, abbreviation].compact.join('|')}\Z/
       @format = options[:format] || dimension.nil? ? "%s %U" : "%s%U"
-      @preference = options[:preference] || 1
+      @preference = options[:preference] || 0
       validate
     end
 

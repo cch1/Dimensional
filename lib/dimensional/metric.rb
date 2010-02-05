@@ -33,8 +33,8 @@ module Dimensional
 
       def configure(unit, options = {})
         @dimension ||= unit.dimension
-        @base ||= unit.base
-        @default ||= unit.base
+        @base ||= unit
+        @default ||= unit
         @units = nil
         raise "Unit #{unit} is not compatible with dimension #{dimension || '<nil>'}." unless unit.dimension == dimension
         configuration[unit] = {:detector => unit.detector, :format => unit.format, :preference => unit.preference * 1.01}.merge(options)
@@ -59,6 +59,14 @@ module Dimensional
           new(t + converted_value, t.unit)
         end
       end
+
+      # Sort units by "best" fit for the desired order of magnitude.  Preference values offset OOM differences.
+      def best_fit(target_oom)
+        units.sort_by do |u|
+          oom_delta = (Math.log10(u.factor) - target_oom).abs
+          configuration[u][:preference] - oom_delta
+        end
+      end
     end
 
     attr_reader :unit
@@ -74,27 +82,19 @@ module Dimensional
       self.class.new(new_value, new_unit)
     end
 
-    # Convert this measure to the most appropriate unit in the given system
-    # A heuristic approach is used that considers the resulting measure's order-of-magnitude (similar
-    # is good) and preference of the unit (greater is better).
-    def change_system(system, fallback = false)
+    # Convert this metric to the "most appropriate" unit in the given system.  A similar order-of-magnitude for the result is preferred.
+    def change_system(system)
       system = System[system] unless system.kind_of?(System)
-      units = self.class.units.select{|u| system == u.system}
-      if units.empty?
-        if fallback
-          units = self.units
-        else
-          raise "No suitable units available in #{system}"
-        end
-      end
       target_oom = Math.log10(self.unit.factor)
-      units = units.sort_by do |u|
-        oom_delta = (Math.log10(u.factor) - target_oom).abs #  == Math.log10(self.unit.factor / u.factor)
-        magnitude_fit = Math.exp(-0.20 * oom_delta) # decay function
-        0.75 * magnitude_fit + 0.25 * self.class.configuration[u][:preference]
-      end
-      u = units.last
-      convert(u)
+      bu = self.class.best_fit(target_oom).select{|u| u.system == system}.last
+      convert(bu)
+    end
+
+    # Convert this metric to the "most appropriate" unit in the current system.  A resulting order of magnitude close to zero is preferred.
+    def preferred
+      target_oom = Math.log10(self) + Math.log10(self.unit.factor)
+      bu = self.class.best_fit(target_oom).select{|u| u.system == unit.system}.last
+      convert(bu)
     end
 
     # Return a new metric expressed in the base unit

@@ -61,4 +61,12 @@ class DimensionalTest < Test::Unit::TestCase
     assert_in_delta 23, m, 0.1
     assert_same Unit[:Vel, :US, 'mph'], m.unit
   end
+
+  def test_autonomy
+    assert m = Autonomy.new(200000, Unit[:L, :SI, :meter])
+    assert_same Unit[:L, :SI, :meter], m.unit
+    m = m.change_system(:US)
+    assert_in_delta 124.3, m, 0.1
+    assert_same Unit[:L, :US, :mi], m.unit
+  end
 end

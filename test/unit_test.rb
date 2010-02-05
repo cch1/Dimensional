@@ -154,6 +154,6 @@ class UnitTest < Test::Unit::TestCase
 
   def test_default_preference
     u0 = Unit.new('mile', System::BA, Dimension::L, :abbreviation => 'nm')
-    assert_equal 1, u0.preference
+    assert_equal 0, u0.preference
   end
 end

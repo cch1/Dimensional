@@ -203,6 +203,29 @@ class MetricTest < Test::Unit::TestCase
     assert_same @kilometer, m1.unit
   end
 
+  # These preferred tests rely on very specific constants in the heuristics of #prefer
+  def test_preferred_unit_with_only_oom
+    range = Class.new(Metric)
+    range.instance_eval do
+      self.dimension = Dimension::L
+    end
+    m0 = range.new(100000, @meter)
+    assert m1 = m0.preferred
+    assert_same @kilometer, m1.unit
+  end
+
+  # These preferred tests rely on very specific constants in the heuristics of #prefer
+  def test_preferred_unit_with_oom_and_preference
+    range = Class.new(Metric)
+    range.instance_eval do
+      self.dimension = Dimension::L
+      configure Unit[:L, :SI, :meter], {:preference => 3.01}
+    end
+    m0 = range.new(100000, Unit[:L, :SI, :meter])
+    assert m1 = m0.preferred
+    assert_same @meter, m1.unit
+  end
+
   def test_convert_to_base
     range = Class.new(Metric)
     range.dimension = Dimension::L

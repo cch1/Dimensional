@@ -8,7 +8,6 @@ module Dimensional
 
     def self.register(*args)
       d = new(*args)
-      raise "Dimension #{d} already exists" if @registry.values.include?(d)
       raise "Dimension #{d}'s symbol already exists" if @symbol_registry[d.symbol]
       @registry[d.name.to_sym] = d
       @symbol_registry[d.symbol.to_sym] = d

@@ -4,19 +4,23 @@ include Dimensional
 
 # Define fundamental dimensions and composite dimensions
 # Reference: http://en.wikipedia.org/wiki/Dimensional_Analysis
-Dimension.register('Length')
 Dimension.register('Mass')
+Dimension.register('Length')
 Dimension.register('Time')
+Dimension.register('Electric Current', 'I')
 Dimension.register('Temperature', 'Θ')
+Dimension.register('Luminous Intensity', 'Iv')
 Dimension.register('Electric Charge', 'Q')
+Dimension.register('Frequency', 'f', {Dimension::T => -1})
 Dimension.register('Area', 'A', {Dimension::L => 2})
 Dimension.register('Volume', 'V', {Dimension::L => 3})
 Dimension.register('Velocity', 'Vel', {Dimension::L => 1, Dimension::T => -1})
 Dimension.register('Acceleration', 'Acc', {Dimension::L => 1, Dimension::T => -2})
 Dimension.register('Force', 'F', {Dimension::M => 1, Dimension::L => 1, Dimension::T => -2})
-#Dimension.register('Torque', 'τ', {Dimension::M => 1, Dimension::L => 2, Dimension::T => -2}) # equivalent to Energy
+Dimension.register('Torque', 'τ', {Dimension::M => 1, Dimension::L => 2, Dimension::T => -2}) # equivalent to Energy
 Dimension.register('Energy', 'E', {Dimension::M => 1, Dimension::L => 2, Dimension::T => -2}) # a.k.a. work
 Dimension.register('Power', 'P', {Dimension::M => 1, Dimension::L => 2, Dimension::T => -3})
+Dimension.register('Voltage', 'emf', {Dimension::M => 1, Dimension::L => 2, Dimension::I => -1, Dimension::T => -3})
 
 # Define common Systems of Measurement
 System.register('SI - International System (kg, tonne, m)', 'SI')
@@ -111,6 +115,12 @@ Configurator.start do
     end
   end
 
+  dimension(:Iv) do
+    system(:SI) do
+      base('candela', 'cd')
+    end
+  end
+
   dimension(:A) do
     system(:SI) do
       combine('square meter', 'm2', {Unit[:L, :SI, :meter] => 2}, :detector => /\A(sq\.?\s?met(er|re)s?|m2)\Z/) do
@@ -189,6 +199,14 @@ Configurator.start do
     end
   end
 
+  dimension(:f) do
+    system(:SI) do
+      combine('hertz', 'Hz', {Unit[:T, :SI, :s] => -1}) do
+        derive('revolution per minute', 'RPM', Rational(1, 60))
+      end
+    end
+  end
+
   dimension(:Vel) do
     system(:SI) do
       combine('meter per second', 'm/s', {Unit[:L, :SI, :m] => 1, Unit[:T, :SI, :second] => -1}) do
@@ -237,7 +255,40 @@ Configurator.start do
     end
   end
 
+  dimension(:Temperature) do
+    system(:SI) do
+      base('Kelvin', 'K')
+    end
+    system(:US) do
+      reference('Rankine', '°R', Unit[:Temperature, :SI, :K], Rational(9, 5), :detector => /\A(°Ra?|degrees Rankine)\Z/)
+    end
+  end
+
+  dimension(:I) do
+    system(:SI) do
+      base('Ampere', 'A', :detector => /\A(amp(ere)?s?|A)\Z/)
+    end
+  end
+
+  dimension(:Q) do
+    system(:SI) do
+      combine('coulomb', 'C', {Unit[:I, :SI, :A] => 1, Unit[:T, :SI, :s] => 1}, :detector => /\A(coulombs?|C)\Z/)
+    end
+  end
+
+  dimension(:Voltage) do
+    system(:SI) do
+      combine('Volt', 'V',{Unit[:P, :SI, :W] => 1, Unit[:I, :SI, :A] => -1}, :detector => /\A(volts?|V)\Z/) do
+        derive('millivolt', 'mV', Rational(1, 1000))
+        derive('kilovolt', 'kV', 1000)
+      end
+    end
+  end
+
   dimension(nil) do
+    system(:SI) do
+      base('mole', 'mol')
+    end
     system(:US) do
       base('each', 'ea', :detector => /\Aea(ch)?\Z/) do
         derive('pair', 'pr', 2, :detector => /\A(pr|pair)\Z/)
@@ -253,6 +304,15 @@ end
 class Length < Dimensional::Metric
   self.dimension = Dimensional::Dimension::L
   self.default = Unit[:L, :SI, :m]
+end
+
+class Autonomy < Dimensional::Metric
+  self.dimension = Dimension::L
+  self.default = Unit[:L, :BA, :nm]
+  self.base = Unit[:L, :SI, :m]
+  configure(Unit[:L, :SI, :km], {:preference => 2})
+  configure(Unit[:L, :US, :mi], {:preference => 3.5})
+  configure(Unit[:L, :Imp, :mi], {:preference => 3.5})
 end
 
 class EngineDisplacement < Dimensional::Metric

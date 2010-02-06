@@ -1,4 +1,4 @@
-require 'test/unit'
+require 'helper'
 require 'dimensional/configurator'
 
 class ConfiguratorTest < Test::Unit::TestCase

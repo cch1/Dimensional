@@ -1,5 +1,4 @@
-require 'test/unit'
-require 'dimensional/metric'
+require 'helper'
 require 'rational'
 
 class MetricTest < Test::Unit::TestCase

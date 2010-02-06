@@ -1,5 +1,4 @@
-require 'test/unit'
-require 'dimensional/dimension'
+require 'helper'
 
 class DimensionTest < Test::Unit::TestCase
   include Dimensional

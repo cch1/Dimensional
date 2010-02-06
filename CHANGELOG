@@ -1,0 +1,3 @@
+0.1.0
+0.1.1	Simpler conversion system-to-system and redefinition of preference semantics.
+0.1.2	Cleanup tests to work with gem check -t

@@ -1,11 +1,32 @@
+require 'rubygems'
 require 'rake'
 require 'rake/testtask'
 require 'rake/rdoctask'
-require 'rake/gempackagetask'
-require 'rubygems'
+require 'jeweler'
 require 'lib/dimensional/version'
 
-task :default => [:test]
+spec = Gem::Specification.new do |spec|
+  # gem is a Gem::Specification... see http://www.rubygems.org/read/chapter/20 for additional settings
+  spec.platform = Gem::Platform::RUBY
+  spec.name = %q{dimensional}
+  spec.version = Dimensional::VERSION
+  spec.required_ruby_version = '>= 1.6.8'
+  spec.date = Time.now.strftime("%Y-%m-%d")
+  spec.authors = ["Chris Hapgood"]
+  spec.email = %q{cch1@hapgoods.com}
+  spec.summary = %q{Dimensional provides handling for numbers with units.}
+  spec.homepage = %q{http://cho.hapgoods.com/dimensional}
+  spec.description = <<-EOF
+    Dimensional provides handling for dimensional values (numbers with units).  Dimensional values
+    can be parsed, stored, converted and formatted for output.
+  EOF
+  spec.files = Dir['lib/**/*.rb'] + Dir['test/**/*.rb']
+  spec.files += ["README", "CHANGELOG", "LICENSE", "Rakefile", "test/helper.rb"]
+  spec.test_files = ["test/helper.rb"] + Dir['test/**/*_test.rb']
+end
+
+Jeweler::Tasks.new(spec)
+Jeweler::GemcutterTasks.new
 
 Rake::TestTask.new do |t|
   t.libs << 'test'
@@ -14,26 +35,14 @@ Rake::TestTask.new do |t|
 end
 Rake::Task['test'].comment = "Run all tests in test/*_test.rb"
 
-spec = Gem::Specification.new do |s|
-  s.platform = Gem::Platform::RUBY
-  s.name = %q{dimensional}
-  s.version = Dimensional::VERSION
-  s.required_ruby_version = '>= 1.6.8'
-  s.date = %q{2009-10-09}
-  s.authors = ["Chris Hapgood"]
-  s.email = %q{cch1@hapgoods.com}
-  s.summary = %q{Dimensional provides handling for numbers with units.}
-  s.homepage = %q{http://cho.hapgoods.com/dimensional}
-  s.description = <<-EOF
-    Dimensional provides handling for dimensional values (numbers with units).  Dimensional values
-    can be parsed, stored, converted and formatted for output.
-  EOF
-  s.files = Dir['lib/**/*.rb'] + Dir['test/**/*.rb']
-  s.files += ["README", "CHANGELOG", "LICENSE", "Rakefile"]
-  s.test_files = Dir['test/**/*.rb']
+Rake::RDocTask.new do |rdoc|
+  version = File.exist?('VERSION') ? File.read('VERSION') : ""
+
+  rdoc.rdoc_dir = 'rdoc'
+  rdoc.title = "tttt #{version}"
+  rdoc.rdoc_files.include('README*')
+  rdoc.rdoc_files.include('lib/**/*.rb')
 end
 
-Rake::GemPackageTask.new(spec) do |pkg|
-    pkg.need_zip = true
-    pkg.need_tar = false
-end
+task :test => :check_dependencies
+task :default => :test

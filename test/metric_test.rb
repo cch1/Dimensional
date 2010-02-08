@@ -15,6 +15,7 @@ class MetricTest < Test::Unit::TestCase
     @meter = Unit.register('meter', System::SI, Dimension::L, {:abbreviation => 'm'})
     @kilometer = Unit.register('kilometer', System::SI, Dimension::L, {:reference_units => {@meter => 1}, :reference_factor => 1000, :abbreviation => 'km'})
     @centimeter = Unit.register('centimeter', System::SI, Dimension::L, {:reference_units => {@meter => 1}, :reference_factor => Rational(1,100), :abbreviation => 'cm'})
+    @international_nautical_mile = Unit.register('nautical mile', System::SI, Dimension::L, {:reference_units => {@meter => 1}, :reference_factor => Rational(1852,1), :abbreviation => 'M', :preference => -3})
     # Length Units - US
     @yard_us = Unit.register('yard', System::US, Dimension::L, {:reference_units => {@meter => 1}, :reference_factor => 0.9144, :abbreviation => 'yd'})
     @foot_us = Unit.register('foot', System::US, Dimension::L, {:reference_units => {@yard_us => 1}, :reference_factor => Rational(1,3), :abbreviation => 'ft'})
@@ -74,11 +75,35 @@ class MetricTest < Test::Unit::TestCase
     assert_equal @yard_us, m.unit
   end
 
+  def test_load_metric
+    range = Class.new(Metric)
+    range.instance_eval do
+      self.dimension = Dimension::L
+      self.base = Unit[:L, :SI, :m]
+      configure Unit[:L, :SI, :M], :preference => 0
+    end
+    assert r = range.load(200000)
+    assert_in_delta(108, r, 0.1)
+    assert_same @international_nautical_mile, r.unit
+  end
+
   def test_find_unit
     depth = Class.new(Metric)
     depth.dimension = Dimension::L
     assert_same @foot_ba, depth.find_unit('foot', :BA)
     assert_same @foot_us, depth.find_unit('foot', :US)
+  end
+
+  def test_scanner
+    assert_equal [%w(3 m)], "3m".scan(Metric::NUMERIC_REGEXP)
+    assert_equal [%w(3 m)], "3 m".scan(Metric::NUMERIC_REGEXP)
+    assert_equal [%w(.3 m)], ".3m".scan(Metric::NUMERIC_REGEXP)
+    assert_equal [%w(0.3 m)], "0.3m".scan(Metric::NUMERIC_REGEXP)
+    assert_equal [%w(01.32 m)], "01.32m".scan(Metric::NUMERIC_REGEXP)
+    assert_equal [%w(6 '), %w(4 ")], "6'4\"".scan(Metric::NUMERIC_REGEXP)
+    assert_equal [%w(6 feet), %w(4 inches)], "6 feet 4 inches".scan(Metric::NUMERIC_REGEXP)
+    assert_equal [["1.32", "nautical miles"]], "1.32 nautical miles".scan(Metric::NUMERIC_REGEXP)
+#    assert_equal [%w(.3 m3)], ".3m3".scan(Metric::NUMERIC_REGEXP)
   end
 
   def test_parse
@@ -94,6 +119,14 @@ class MetricTest < Test::Unit::TestCase
     depth.dimension = Dimension::L
     m = depth.parse("15 ft", :BA)
     assert_same @foot_ba, m.unit
+    assert_equal 15, m
+  end
+
+  def test_parse_with_multiword_unit
+    range = Class.new(Metric)
+    range.dimension = Dimension::L
+    m = range.parse("15 nautical miles", :SI)
+    assert_same @international_nautical_mile, m.unit
     assert_equal 15, m
   end
 

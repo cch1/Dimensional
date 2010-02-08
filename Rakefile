@@ -39,8 +39,9 @@ Rake::RDocTask.new do |rdoc|
   version = File.exist?('VERSION') ? File.read('VERSION') : ""
 
   rdoc.rdoc_dir = 'rdoc'
-  rdoc.title = "tttt #{version}"
-  rdoc.rdoc_files.include('README*')
+  rdoc.title = "Dimensional #{version}"
+  rdoc.rdoc_files.include(%w(README LICENSE CHANGELOG TODO))
+  rdoc.rdoc_files.include('test/demo.rb')
   rdoc.rdoc_files.include('lib/**/*.rb')
 end
 

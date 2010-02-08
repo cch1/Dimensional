@@ -36,7 +36,7 @@ Configurator.start do
       base('meter', 'm', :detector => /\A(met(er|re)s?|m)\Z/) do
         derive('decimeter', 'dm', Rational(1, 10), :detector => /\A(decimet(er|re)s?|dm)\Z/, :preference => 0.5)
         derive('centimeter', 'cm', Rational(1, 100), :detector => /\A(centimet(er|re)s?|cm)\Z/)
-        derive('decameter', 'km', 10, :detector => /\A(de(c|k)amet(er|re)s?|dam)\Z/)
+        derive('decameter', 'dam', 10, :detector => /\A(de(c|k)amet(er|re)s?|dam)\Z/)
         derive('kilometer', 'km', 1000, :detector => /\A(kilomet(er|re)s?|km)\Z/)
         derive('nautical mile', 'M', 1852, :detector => /\A(nautical miles?|NMs?|nmis?)\Z/)
       end
@@ -70,8 +70,8 @@ Configurator.start do
       reference('mile', 'nm', Dimensional::Unit[:L, :SI, 'meter'], 1852.216, :detector => /\A((nautical )?mile|nm|nmi)\Z/) do
         derive('league', nil, 3, :detector => /\A(leagues?)\Z/)
         derive('cable', nil, Rational(1,10), :detector => /\A(cables?|cbls?)\Z/) do
-          derive('fathom', 'fm', Rational(1,10), :detector => /\A(fathoms?|fms?)\Z/) do
-            derive('yard', 'yd', Rational(1,6), :detector => /\A(yards?|yds?)\Z/) do
+          derive('fathom', 'fm', Rational(1,100), :detector => /\A(fathoms?|fms?)\Z/) do
+            derive('yard', 'yd', Rational(1,2), :detector => /\A(yards?|yds?)\Z/) do
               derive('foot', 'ft', Rational(1,3), :detector => /\A(foot|feet|ft|')\Z/) do
                 derive('inch', 'in', Rational(1,12), :detector => /\A(inch|inches|in|")\Z/)
               end
@@ -137,6 +137,7 @@ Configurator.start do
           derive('township', 'twp', 36, :detector => /\Atownships?\Z/)
         end
       end
+      combine('square foot', 'ft2', {Unit[:L, :US, :ft] => 2}, :detector => /ft2/)
     end
   end
 
@@ -250,7 +251,6 @@ Configurator.start do
     end
     system(:US) do
       # Using the definition for mechanical horsepower, http://en.wikipedia.org/wiki/Horsepower
-#      reference('horsepower', 'hp', Dimensional::Unit[:P, :SI, 'watt'], 745.69987158227022, :detector => /\A(horsepower|hp)\Z/)
       combine('horsepower', 'hp', {Unit[:E, :US, :'ft-lbf'] => 1, Unit[:T, :SI, :m] => -1}, {:reference_factor => 33000})
     end
   end
@@ -303,13 +303,14 @@ end
 
 class Length < Dimensional::Metric
   self.dimension = Dimensional::Dimension::L
-  self.default = Unit[:L, :SI, :m]
+  self.base = Unit[:L, :SI, :m]
+  self.default = base
 end
 
 class Autonomy < Dimensional::Metric
   self.dimension = Dimension::L
-  self.default = Unit[:L, :BA, :nm]
   self.base = Unit[:L, :SI, :m]
+  self.default = Unit[:L, :BA, :nm]
   configure(Unit[:L, :SI, :km], {:preference => 2})
   configure(Unit[:L, :US, :mi], {:preference => 3.5})
   configure(Unit[:L, :Imp, :mi], {:preference => 3.5})
@@ -317,13 +318,13 @@ end
 
 class EngineDisplacement < Dimensional::Metric
   self.dimension = Dimensional::Dimension::V
-  self.default = Unit[:V, :SI, :l]
-  self.base = default
+  self.base = Unit[:V, :SI, :l]
+  self.default = base
   configure(Unit[:V, :US, :in3], {:preference => 2})
 end
 
 class MechanicalPower < Dimensional::Metric
   self.dimension = Dimensional::Dimension::P
-  self.default = Unit[:P, :SI, :W]
-  self.base = default
+  self.base = Unit[:P, :SI, :W]
+  self.default = base
 end

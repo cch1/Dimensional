@@ -8,7 +8,7 @@ module Dimensional
     # A Measure string is composed of a number followed by a unit separated by optional whitespace.
     # A unit (optional) is composed of a non-digit character followed by zero or more word characters and terminated by some stuff.
     # Scientific notation is not currently supported.
-    NUMERIC_REGEXP = /((?=\d|\.\d)\d*(?:\.\d*)?)\s*(\D\w*?)?(?=\b|\d|\W|$)/
+    NUMERIC_REGEXP = /((?=\d|\.\d)\d*(?:\.\d*)?)\s*(\D.*?)?\s*(?=\d|$)/
 
     class << self
       attr_accessor :dimension, :base, :default
@@ -66,6 +66,11 @@ module Dimensional
           oom_delta = (Math.log10(u.factor) - target_oom).abs
           configuration[u][:preference] - oom_delta
         end
+      end
+
+      # Create a new instance with the given value (assumed to be in the base unit) and convert it to the preferred unit.
+      def load(v)
+        new(v, base).preferred
       end
     end
 

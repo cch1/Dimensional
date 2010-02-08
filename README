@@ -3,9 +3,22 @@
 # unit-oriented methods into Ruby standard classes -to perform operations, particularly across dimensions, you
 # will need to use basic conversion methods provided by this library combined with standard Ruby numerical oper-
 # ations.  There is no method_missing magic or large mixin of spiffy unit-like methods here.
-
-# The long-term objective for this library is to achieve compliance with the UCUM standard, with additional
-# facilities for simple parsing and formatting of measures according to localized standards, and conversion
-# of measures between units.  References:
+#
+# Here are some examples of what you can do with the Dimensional library:
+#
+# require 'dimensional'
+# require 'test/demo'
+# class Autonomy < Dimensional::Metric
+#   self.dimension = Dimensional::Dimension::L
+# end 
+# range = Autonomy.parse("15 nautical miles")
+# range.to_s	# => "15M"
+# range.base  # => <Rational(27780, 1) <meter>>
+# range.base.to_s # => "27780m"
+# usrange = range.convert(Dimensional::Unit[:L, :US, :yd])	# => <30380.5774278215 <yard>>
+#
+# The demo library in the test directory contains a good starter set of units.
+#
+# The long-term objective for this library is to achieve compliance with the UCUM standard.  References:
 #   UCUM Website: http://unitsofmeasure.org/
 #   UCUM Standard: http://aurora.regenstrief.org/~ucum/ucum.html

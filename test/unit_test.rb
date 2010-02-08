@@ -25,7 +25,9 @@ class UnitTest < Test::Unit::TestCase
     assert_same Dimension::L, u.dimension
     assert u.base?
     assert_equal({u => 1}, u.base)
-    assert_same 1, u.factor
+    assert_kind_of Rational, u.base[u]
+    assert_equal 1, u.factor
+    assert_kind_of Rational, u.factor
   end
 
   def test_enumerability

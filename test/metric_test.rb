@@ -161,6 +161,14 @@ class MetricTest < Test::Unit::TestCase
     assert_same @fathom, new.unit
   end
 
+  def test_convert_with_fractional_factor
+    range = Class.new(Metric)
+    range.dimension = Dimension::L
+    new = range.new(100000, @meter).convert(@kilometer)
+    assert_in_delta(100, new, 0.000001)
+    assert_same @kilometer, new.unit
+  end
+
   def test_identity_conversion
     depth = Class.new(Metric)
     depth.dimension = Dimension::L

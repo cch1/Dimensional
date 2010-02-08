@@ -48,7 +48,7 @@ module Dimensional
       @name = name.to_s
       @system = system
       @dimension = dimension
-      @reference_factor = options[:reference_factor] || 1
+      @reference_factor = options[:reference_factor] || Rational(1,1)
       @reference_units = options[:reference_units] || {}
       @abbreviation = options[:abbreviation]
       @detector = options[:detector] || /\A#{[name, abbreviation].compact.join('|')}\Z/
@@ -73,7 +73,7 @@ module Dimensional
     # The technique used is to multiply the bases' exponents by our exponent and then consolidate
     # resulting common bases by adding their exponents.
     def base
-      return {self => 1} if base?
+      return {self => Rational(1,1)} if base?
       @base ||= reference_units.inject({}) do |summary0, (ru0, exp0)|
         t = ru0.base.inject({}){|summary1, (ru1, exp1)| summary1[ru1] = exp1 * exp0;summary1}
         summary0.merge(t) {|ru, expa, expb| expa + expb}
@@ -82,13 +82,13 @@ module Dimensional
 
     # The conversion factor relative to the base unit.
     def factor
-      @factor ||= reference_factor * reference_units.inject(1){|f, (ru, exp)| f * (ru.factor**exp)}
+      @factor ||= reference_factor * reference_units.inject(Rational(1,1)){|f, (ru, exp)| f * (ru.factor**exp)}
     end
 
     # Returns the conversion factor to convert to the other unit
     def convert(other)
       raise "Units #{self} and #{other} are not commensurable" unless commensurable?(other)
-      return 1 if self == other
+      return Rational(1,1) if self == other
       self.factor / other.factor
     end
 

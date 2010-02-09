@@ -31,8 +31,8 @@ class SystemTest < Test::Unit::TestCase
     assert_same s, System::BA
   end
 
-  def test_not_raise_exception_when_system_not_found
-    assert_nothing_raised do
+  def test_raise_exception_when_system_not_found
+    assert_raises RuntimeError do
       System['British Admiralty']
     end
   end

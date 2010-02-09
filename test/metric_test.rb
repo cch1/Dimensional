@@ -151,7 +151,7 @@ class MetricTest < Test::Unit::TestCase
     depth = Class.new(Metric)
     depth.dimension = Dimension::L
     assert_raises ArgumentError do
-      depth.parse("1 foot 11cm", :L)
+      depth.parse("1 foot 11cm", :US)
     end
   end
 
@@ -284,7 +284,7 @@ class MetricTest < Test::Unit::TestCase
   def test_parse_gibberish_as_nil
     beam = Class.new(Metric)
     beam.dimension = Dimension::L
-    assert_nil beam.parse("gibberish", :L)
+    assert_nil beam.parse("gibberish", :US)
   end
 
   def test_format_output

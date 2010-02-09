@@ -20,7 +20,7 @@ module Dimensional
 
       # Find the unit matching the given string, preferring units in the given system
       def find_unit(str, system = nil)
-        system = System[system] unless system.kind_of?(System)
+        system = system && System[system] unless system.kind_of?(System)
         us = self.units.select{|u| configuration[u][:detector].match(str.to_s)}
         us.detect{|u| u.system == system} || us.first
       end
@@ -43,7 +43,7 @@ module Dimensional
       # Parse a string into a Metric instance. Providing a unit system (or associated symbol) will prefer the units from that system.
       # Unrecognized strings return nil.
       def parse(str, system = nil)
-        system = System[system] unless system.kind_of?(System)
+        system = system && System[system] unless system.kind_of?(System)
         elements = str.to_s.scan(NUMERIC_REGEXP).map do |(v, us)|
           unit = us.nil? ? default : find_unit(us, system)
           raise ArgumentError, "Unit cannot be determined (#{us})" unless unit

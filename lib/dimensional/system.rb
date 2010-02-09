@@ -18,8 +18,10 @@ module Dimensional
     
     # Lookup the system by name or abbreviation
     def self.[](sym)
-      return nil unless sym = sym && sym.to_sym
-      @abbreviation_registry[sym] || @registry[sym]
+      sym = sym && sym.to_sym
+      s = @abbreviation_registry[sym] || @registry[sym]
+      raise "Unknown system #{sym.to_s}" unless s
+      s
     end
     
     # Purge all systems from storage.

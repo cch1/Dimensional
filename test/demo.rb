@@ -24,6 +24,7 @@ Dimension.register('Voltage', 'emf', {Dimension::M => 1, Dimension::L => 2, Dime
 
 # Define common Systems of Measurement
 System.register('SI - International System (kg, tonne, m)', 'SI')
+System.register('Universal', 'U') # International standards not included in SI
 System.register('US Customary (lbs, ton, ft)', 'US')  # http://en.wikipedia.org/wiki/United_States_customary_units
 System.register('US Customary Troy (oz)', 'USt')  # http://en.wikipedia.org/wiki/United_States_customary_units
 System.register('British Imperial (lbs, ton, ft)', 'Imp')  # http://en.wikipedia.org/wiki/Imperial_units
@@ -38,8 +39,10 @@ Configurator.start do
         derive('centimeter', 'cm', Rational(1, 100), :detector => /\A(centimet(er|re)s?|cm)\Z/)
         derive('decameter', 'dam', 10, :detector => /\A(de(c|k)amet(er|re)s?|dam)\Z/)
         derive('kilometer', 'km', 1000, :detector => /\A(kilomet(er|re)s?|km)\Z/)
-        derive('nautical mile', 'M', 1852, :detector => /\A(nautical miles?|NMs?|nmis?)\Z/)
       end
+    end
+    system(:U) do
+      reference('nautical mile', 'M', Dimensional::Unit[:L, :SI, 'meter'], 1852, :detector => /\A(nautical miles?|nm|nmi|M)\Z/)
     end
     system(:US) do # As of 1 July 1959 (http://en.wikipedia.org/wiki/United_States_customary_units#Units_of_length)
       reference('yard', 'yd', Unit[:L, :SI, 'meter'], 0.9144, :detector => /\A(yards?|yds?)\Z/) do
@@ -218,8 +221,8 @@ Configurator.start do
     system(:US) do
       combine('mile per hour', 'mph', {Unit[:L, :US, :mile] => 1, Unit[:T, :SI, :hour] => -1}, :detector => /\A(mile per hour|mph)\Z/)
     end
-    system(:BA) do
-      combine('knot', 'kt', {Unit[:L, :BA, :nm] => 1, Unit[:T, :SI, :hour] => -1}, :detector => /\A(knots?|kts?)\Z/)
+    system(:U) do
+      combine('knot', 'kt', {Unit[:L, :U, :M] => 1, Unit[:T, :SI, :hour] => -1}, :detector => /\A(knots?|kn|kts?)\Z/)
     end
   end
 

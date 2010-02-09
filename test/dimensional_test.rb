@@ -55,7 +55,7 @@ class DimensionalTest < Test::Unit::TestCase
     end
     assert m = speed.parse('20 knots')
     assert_equal 20, m
-    assert_same Unit[:Vel, :BA, 'knot'], m.unit
+    assert_same Unit[:Vel, :U, 'knot'], m.unit
     m = m.change_system(:US)
     assert_in_delta 23, m, 0.1
     assert_same Unit[:Vel, :US, 'mph'], m.unit

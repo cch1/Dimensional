@@ -275,7 +275,7 @@ class MetricTest < Test::Unit::TestCase
   def test_stringify_with_abbreviation
     range = Class.new(Metric)
     range.dimension = Dimension::L
-    assert_equal "1.85nm", range.parse('1.85 miles', Locale::BA).to_s
+    assert_equal "1.85 nm", range.parse('1.85 miles', Locale::BA).to_s
   end
 
   def test_parse_gibberish_as_nil

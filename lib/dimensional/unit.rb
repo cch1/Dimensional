@@ -52,7 +52,7 @@ module Dimensional
       @reference_units = options[:reference_units] || {}
       @abbreviation = options[:abbreviation]
       @detector = options[:detector] || /\A#{[name, abbreviation].compact.join('|')}\Z/
-      @format = options[:format] || dimension.nil? ? "%s %U" : "%s%U"
+      @format = options[:format] || "%s %U"
       @preference = options[:preference] || 0
       validate
     end

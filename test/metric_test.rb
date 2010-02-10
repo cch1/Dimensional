@@ -229,7 +229,7 @@ class MetricTest < Test::Unit::TestCase
     range.dimension = Dimension::L
     m0 = range.new(1, @foot_us)
     assert m1 = m0.change_system(:SI)
-    assert_same @meter, m1.unit
+    assert_same @centimeter, m1.unit
   end
 
   def test_change_system_mile

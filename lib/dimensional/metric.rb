@@ -62,12 +62,13 @@ module Dimensional
       end
 
       # Sort units by "best" fit for the desired order of magnitude.  Preference values offset OOM differences.  There is
-      # a bias in favor of positive OOM differences (humans like 6" more than 0.5ft).
+      # a bias in favor of negative OOM differences (humans like 6" more than 0.5ft).
       def best_fit(target_oom, system)
         us = units[system]
         us = us.sort_by do |u|
           oom_delta = Math.log10(u.factor) - target_oom
-          (configuration[u][:preference] - oom_delta.abs) + (oom_delta <=> 0.0)*0.5
+          avoid_fraction_bonus = (oom_delta > 0.0 ? 0 : 1.5)
+          (configuration[u][:preference] - oom_delta.abs) + avoid_fraction_bonus 
         end
         us.last
       end

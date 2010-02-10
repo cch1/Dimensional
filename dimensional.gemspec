@@ -5,11 +5,11 @@
 
 Gem::Specification.new do |s|
   s.name = %q{dimensional}
-  s.version = "1.1.1"
+  s.version = "2.0.0"
 
   s.required_rubygems_version = Gem::Requirement.new(">= 0") if s.respond_to? :required_rubygems_version=
   s.authors = ["Chris Hapgood"]
-  s.date = %q{2010-02-08}
+  s.date = %q{2010-02-10}
   s.description = %q{    Dimensional provides handling for dimensional values (numbers with units).  Dimensional values
     can be parsed, stored, converted and formatted for output.
 }
@@ -27,6 +27,7 @@ Gem::Specification.new do |s|
      "lib/dimensional.rb",
      "lib/dimensional/configurator.rb",
      "lib/dimensional/dimension.rb",
+     "lib/dimensional/locale.rb",
      "lib/dimensional/metric.rb",
      "lib/dimensional/system.rb",
      "lib/dimensional/unit.rb",
@@ -36,6 +37,7 @@ Gem::Specification.new do |s|
      "test/dimension_test.rb",
      "test/dimensional_test.rb",
      "test/helper.rb",
+     "test/locale_test.rb",
      "test/metric_test.rb",
      "test/system_test.rb",
      "test/unit_test.rb"
@@ -51,6 +53,7 @@ Gem::Specification.new do |s|
      "test/configurator_test.rb",
      "test/dimension_test.rb",
      "test/dimensional_test.rb",
+     "test/locale_test.rb",
      "test/metric_test.rb",
      "test/system_test.rb",
      "test/unit_test.rb"

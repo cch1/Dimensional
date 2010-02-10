@@ -4,3 +4,4 @@
 1.0.0	Production Release 1.
 1.0.1	Use Rationals for default values and avoid the dreaded integer division = 0 problem.
 1.1.1	Add Metric.load constructor, improve docs and enhance scanner.
+2.0.0	Introduce Dimensional::Locale

@@ -1,1 +1,4 @@
 1. Fix parsing units like "6m3" for six cubic meters.
+2. Allow locale-specific formatters and detectors.
+3. Default format per dimension/system/metric.
+4. Auto generation of metric prefix units.

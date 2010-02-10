@@ -16,6 +16,7 @@ class DimensionalTest < Test::Unit::TestCase
     Dimension.reset!
     System.reset!
     Unit.reset!
+    Locale.reset!
   end
 
   def test_a_lot
@@ -29,10 +30,10 @@ class DimensionalTest < Test::Unit::TestCase
   end
 
   def test_engine_displacement
-    assert m = EngineDisplacement.parse('5.7l')
+    assert m = EngineDisplacement.load(5.7)
     assert_equal 5.7, m
     assert_same Unit[:V, :SI, 'liter'], m.unit
-    m = m.change_system(:US)
+    m = m.localize(Locale::US)
     assert_in_delta 347, m, 1
     assert_same Unit[:V, :US, 'in3'], m.unit
   end
@@ -41,7 +42,7 @@ class DimensionalTest < Test::Unit::TestCase
     assert m = MechanicalPower.parse('430hp')
     assert_equal 430, m
     assert_same Unit[:P, :US, :hp], m.unit
-    m = m.change_system(:SI)
+    m = m.localize(Locale::FI)
     assert_in_delta 320, m, 1
     assert_same Unit[:P, :SI, :kW], m.unit
   end
@@ -53,19 +54,20 @@ class DimensionalTest < Test::Unit::TestCase
       self.default = Unit[:Vel, :SI, :"km/h"]
       self.base = default
     end
-    assert m = speed.parse('20 knots')
+    assert m = speed.parse('20 knots', Locale::DK)
     assert_equal 20, m
     assert_same Unit[:Vel, :U, 'knot'], m.unit
-    m = m.change_system(:US)
+    m = m.localize(Locale::US)
     assert_in_delta 23, m, 0.1
     assert_same Unit[:Vel, :US, 'mph'], m.unit
   end
 
+  # All Locale's should have an explicit system ordering for the Autonomy metric that places the Universal system first
   def test_autonomy
-    assert m = Autonomy.new(200000, Unit[:L, :SI, :meter])
-    assert_same Unit[:L, :SI, :meter], m.unit
-    m = m.change_system(:US)
-    assert_in_delta 124.3, m, 0.1
-    assert_same Unit[:L, :US, :mi], m.unit
+    assert m = Autonomy.load(200000)
+    assert_same Unit[:L, :U, :M], m.unit
+    assert_in_delta 108, m, 0.1
+    m = m.localize(Locale::US)
+    assert_same Unit[:L, :U, :M], m.unit
   end
 end

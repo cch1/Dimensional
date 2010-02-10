@@ -8,21 +8,25 @@ module Dimensional
     # A Measure string is composed of a number followed by a unit separated by optional whitespace.
     # A unit (optional) is composed of a non-digit character followed by zero or more word characters and terminated by some stuff.
     # Scientific notation is not currently supported.
+    # TODO: Move this to a locale
     NUMERIC_REGEXP = /((?=\d|\.\d)\d*(?:\.\d*)?)\s*(\D.*?)?\s*(?=\d|$)/
 
     class << self
-      attr_accessor :dimension, :base, :default
+      attr_accessor :dimension, :base, :default, :universal_systems
 
-      # The units applicable to this metric in priority order (highest priority first)
+      # The units of this metric, grouped by system.
       def units
-        @units ||= Unit.select{|u| u.dimension == dimension}.sort_by{|u| configuration[u][:preference]}.reverse
+        @units ||= Hash.new([]).merge(Unit.select{|u| u.dimension == dimension}.group_by{|u| u.system})
       end
 
-      # Find the unit matching the given string, preferring units in the given system
-      def find_unit(str, system = nil)
-        system = system && System[system] unless system.kind_of?(System)
-        us = self.units.select{|u| configuration[u][:detector].match(str.to_s)}
-        us.detect{|u| u.system == system} || us.first
+      def systems(locale)
+        locale.systems.dup.unshift(*(universal_systems || [])).uniq
+      end
+
+      # Find the unit matching the given string, preferring units in the given locale
+      def find_unit(str, locale = Locale.default)
+        us = systems(locale).inject([]){|us, system| us + units[system].sort_by{|u| configuration[u][:preference]}.reverse}
+        us.detect{|u| configuration[u][:detector].match(str.to_s)}
       end
 
       def configuration
@@ -35,19 +39,16 @@ module Dimensional
         @dimension ||= unit.dimension
         @base ||= unit
         @default ||= unit
-        @units = nil
         raise "Unit #{unit} is not compatible with dimension #{dimension || '<nil>'}." unless unit.dimension == dimension
         configuration[unit] = {:detector => unit.detector, :format => unit.format, :preference => unit.preference * 1.01}.merge(options)
       end
 
-      # Parse a string into a Metric instance. Providing a unit system (or associated symbol) will prefer the units from that system.
+      # Parse a string into a Metric instance. Providing a locale will help resolve ambiguities.
       # Unrecognized strings return nil.
-      def parse(str, system = nil)
-        system = system && System[system] unless system.kind_of?(System)
+      def parse(str, locale = Locale.default)
         elements = str.to_s.scan(NUMERIC_REGEXP).map do |(v, us)|
-          unit = us.nil? ? default : find_unit(us, system)
+          unit = us.nil? ? default : find_unit(us, locale)
           raise ArgumentError, "Unit cannot be determined (#{us})" unless unit
-          system = unit.system # Set the system to restrict subsequent filtering
           value = Integer(v) rescue Float(v)
           new(value, unit)
         end
@@ -60,12 +61,15 @@ module Dimensional
         end
       end
 
-      # Sort units by "best" fit for the desired order of magnitude.  Preference values offset OOM differences.
-      def best_fit(target_oom)
-        units.sort_by do |u|
-          oom_delta = (Math.log10(u.factor) - target_oom).abs
-          configuration[u][:preference] - oom_delta
+      # Sort units by "best" fit for the desired order of magnitude.  Preference values offset OOM differences.  There is
+      # a bias in favor of positive OOM differences (humans like 6" more than 0.5ft).
+      def best_fit(target_oom, system)
+        us = units[system]
+        us = us.sort_by do |u|
+          oom_delta = Math.log10(u.factor) - target_oom
+          (configuration[u][:preference] - oom_delta.abs) + (oom_delta <=> 0.0)*0.5
         end
+        us.last
       end
 
       # Create a new instance with the given value (assumed to be in the base unit) and convert it to the preferred unit.
@@ -75,7 +79,7 @@ module Dimensional
     end
 
     attr_reader :unit
-    def initialize(value, unit = self.class.default)
+    def initialize(value, unit = self.class.default || self.class.base)
       raise ArgumentError, "No default unit set" unless unit
       @unit = unit
       super(value)
@@ -87,20 +91,23 @@ module Dimensional
       self.class.new(new_value, new_unit)
     end
 
-    # Convert this metric to the "most appropriate" unit in the given system.  A similar order-of-magnitude for the result is preferred.
+    # Convert into the "most appropriate" unit in the given system.  A similar order-of-magnitude for the result is preferred.
     def change_system(system)
       system = System[system] unless system.kind_of?(System)
       target_oom = Math.log10(self.unit.factor)
-      bu = self.class.best_fit(target_oom).select{|u| u.system == system}.last
+      bu = self.class.best_fit(target_oom, system)
       convert(bu)
     end
 
-    # Convert this metric to the "most appropriate" unit in the current system.  A resulting order of magnitude close to zero is preferred.
-    def preferred
+    # Convert into the best unit for the given Locale.  The first system of the given locale with units is elected the preferred system,
+    # and within the preferred system, preference is given to units yielding a metric whose order of magnitude is close to zero.
+    def localize(locale = Locale.default)
       target_oom = Math.log10(self) + Math.log10(self.unit.factor)
-      bu = self.class.best_fit(target_oom).select{|u| u.system == unit.system}.last
+      preferred_system = self.class.systems(locale).detect{ |s| self.class.units[s].any? }
+      bu = self.class.best_fit(target_oom, preferred_system)
       convert(bu)
     end
+    alias preferred localize
 
     # Return a new metric expressed in the base unit
     def base

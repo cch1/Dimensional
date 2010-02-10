@@ -35,19 +35,16 @@ class MetricTest < Test::Unit::TestCase
     # Dimensionless Units
     @each = Unit.register('each', System::US, nil, {:abbreviation => 'ea'})
     @dozen = Unit.register('dozen', System::US, nil, {:reference_units => {@each => 0}, :reference_factor => 12, :abbreviation => 'dz'})
+    Locale.default.systems = [System::SI, System::US, System::BA]
+    Locale::US.systems = [System::US, System::SI, System::BA]
+    Locale::BA.systems = [System::BA]
   end
 
   def teardown
     Dimension.reset!
     System.reset!
     Unit.reset!
-  end
-
-  def test_associated_units
-    beam = Class.new(Metric)
-    beam.dimension = Dimension::L
-    assert beam.units.include?(@cable)
-    assert !beam.units.include?(@pound_force)
+    Locale.reset!
   end
 
   def test_register_conflicting_unit
@@ -90,8 +87,8 @@ class MetricTest < Test::Unit::TestCase
   def test_find_unit
     depth = Class.new(Metric)
     depth.dimension = Dimension::L
-    assert_same @foot_ba, depth.find_unit('foot', :BA)
-    assert_same @foot_us, depth.find_unit('foot', :US)
+    assert_same @foot_ba, depth.find_unit('foot', Locale::BA)
+    assert_same @foot_us, depth.find_unit('foot', Locale::US)
   end
 
   def test_scanner
@@ -109,7 +106,7 @@ class MetricTest < Test::Unit::TestCase
   def test_parse
     depth = Class.new(Metric)
     depth.dimension = Dimension::L
-    assert m = depth.parse("15ft", :BA)
+    assert m = depth.parse("15ft", Locale::BA)
     assert_same @foot_ba, m.unit
     assert_equal 15, m
   end
@@ -117,7 +114,7 @@ class MetricTest < Test::Unit::TestCase
   def test_parse_with_whitespace
     depth = Class.new(Metric)
     depth.dimension = Dimension::L
-    m = depth.parse("15 ft", :BA)
+    m = depth.parse("15 ft", Locale::BA)
     assert_same @foot_ba, m.unit
     assert_equal 15, m
   end
@@ -125,7 +122,7 @@ class MetricTest < Test::Unit::TestCase
   def test_parse_with_multiword_unit
     range = Class.new(Metric)
     range.dimension = Dimension::L
-    m = range.parse("15 nautical miles", :SI)
+    m = range.parse("15 nautical miles")
     assert_same @international_nautical_mile, m.unit
     assert_equal 15, m
   end
@@ -133,7 +130,7 @@ class MetricTest < Test::Unit::TestCase
   def test_parse_compound
     depth = Class.new(Metric)
     depth.dimension = Dimension::L
-    d = depth.parse("15ft11in", :US)
+    d = depth.parse("15ft11in", Locale::US)
     assert_in_delta(15 + Rational(11, 12), d, 0.000001)
     assert_same @foot_us, d.unit
   end
@@ -141,7 +138,7 @@ class MetricTest < Test::Unit::TestCase
   def test_parse_compound_with_whitespace
     depth = Class.new(Metric)
     depth.dimension = Dimension::L
-    d = depth.parse("1 ft 11 in", :US)
+    d = depth.parse("1 ft 11 in", Locale::US)
     assert_same d.unit, @foot_us
     assert_in_delta(1 + Rational(11, 12).to_f, d, 0.000001)
     assert_same @foot_us, d.unit
@@ -151,7 +148,7 @@ class MetricTest < Test::Unit::TestCase
     depth = Class.new(Metric)
     depth.dimension = Dimension::L
     assert_raises ArgumentError do
-      depth.parse("1 foot 11cm", :US)
+      depth.parse("1 foot 11cm", Locale::US)
     end
   end
 
@@ -159,7 +156,7 @@ class MetricTest < Test::Unit::TestCase
     depth = Class.new(Metric)
     depth.dimension = Dimension::L
     depth.default = @meter
-    assert_instance_of depth, m = depth.parse("10", :US)
+    assert_instance_of depth, m = depth.parse("10", Locale::US)
     assert_equal @meter, m.unit
   end
 
@@ -176,7 +173,7 @@ class MetricTest < Test::Unit::TestCase
   def test_to_f
     depth = Class.new(Metric)
     depth.dimension = Dimension::L
-    d = depth.parse("1.85m", :SI)
+    d = depth.parse("1.85m", Locale::SI)
     assert_instance_of Float, d.to_f
   end
 
@@ -250,7 +247,7 @@ class MetricTest < Test::Unit::TestCase
       self.dimension = Dimension::L
     end
     m0 = range.new(100000, @meter)
-    assert m1 = m0.preferred
+    assert m1 = m0.preferred(Locale::FR)
     assert_same @kilometer, m1.unit
   end
 
@@ -278,26 +275,26 @@ class MetricTest < Test::Unit::TestCase
   def test_stringify_with_abbreviation
     range = Class.new(Metric)
     range.dimension = Dimension::L
-    assert_equal "1.85nm", range.parse('1.85 miles', :BA).to_s
+    assert_equal "1.85nm", range.parse('1.85 miles', Locale::BA).to_s
   end
 
   def test_parse_gibberish_as_nil
     beam = Class.new(Metric)
     beam.dimension = Dimension::L
-    assert_nil beam.parse("gibberish", :US)
+    assert_nil beam.parse("gibberish", Locale::US)
   end
 
   def test_format_output
     depth = Class.new(Metric)
     depth.dimension = Dimension::L
-    m = depth.parse("15ft3in", :BA)
+    m = depth.parse("15ft3in", Locale::BA)
     assert_equal "15.25 (ft)", m.strfmeasure("%4.2f (%U)")
   end
 
   def test_format_output_with_multiple_substitutions
     depth = Class.new(Metric)
     depth.dimension = Dimension::L
-    m = depth.parse("15ft4in", :BA)
+    m = depth.parse("15ft4in", Locale::BA)
     assert_equal "15.33 (ft)\t%\t<15.3333333ft>", m.strfmeasure("%4.2f (%U)\t%%\t<%10.7f%U>")
   end
 
@@ -305,7 +302,7 @@ class MetricTest < Test::Unit::TestCase
     distance = Class.new(Metric)
     distance.dimension = Dimension::L
     distance.configure(@nautical_mile, :precision => -2)
-    assert_equal "1.8600nm", distance.parse('1.8565454 nm', :BA).strfmeasure("%.4f%U")
-    assert_equal "1.86", distance.parse('1.8565454 nm', :BA).strfmeasure("%s")
+    assert_equal "1.8600nm", distance.parse('1.8565454 nm', Locale::BA).strfmeasure("%.4f%U")
+    assert_equal "1.86", distance.parse('1.8565454 nm', Locale::BA).strfmeasure("%s")
   end
 end

@@ -15,7 +15,7 @@ module Dimensional
       const_set(s.abbreviation, s) rescue nil # Not all symbols strings are valid constant names
       s
     end
-    
+
     # Lookup the system by name or abbreviation
     def self.[](sym)
       sym = sym && sym.to_sym
@@ -23,7 +23,7 @@ module Dimensional
       raise "Unknown system #{sym.to_s}" unless s
       s
     end
-    
+
     # Purge all systems from storage.
     def self.reset!
       constants.each {|d| remove_const(d)}

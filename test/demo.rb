@@ -146,8 +146,8 @@ Configurator.start do
 
   dimension(:V) do
     system(:SI) do
-      combine('cubic meter', 'm3', {Unit[:L, :SI, :meter] => 3}, :detector => /\A(cubic met(er|re)s?|m3)\Z/, :preference => 0.75) do
-        derive('cubic decimeter', 'dm3', Rational(1, 1000), :detector => /\A(cubic decimet(er|re)s?|dm3)\Z/, :preference => 0.5) do
+      combine('cubic meter', 'm3', {Unit[:L, :SI, :meter] => 3}, :detector => /\A(cubic met(er|re)s?|m3)\Z/, :preference => -2) do
+        derive('cubic decimeter', 'dm3', Rational(1, 1000), :detector => /\A(cubic decimet(er|re)s?|dm3)\Z/, :preference => -3) do
           self.alias('liter', 'l', :detector => /\A(lit(er|re)s?|l|L)\Z/) do
             derive('milliliter', 'ml', Rational(1, 1000), :detector => /\A(millilit(er|re)s?|ml|mL)\Z/)
           end
@@ -304,6 +304,10 @@ Configurator.start do
   end
 end
 
+Locale.default.systems = [System::SI, System::U, System::US, System::Imp]
+Locale::US.systems = [System::US, System::USt, System::U, System::SI, System::Imp]
+Locale::GB.systems = [System::Imp, System::SI, System::U, System::US]
+
 class Length < Dimensional::Metric
   self.dimension = Dimensional::Dimension::L
   self.base = Unit[:L, :SI, :m]
@@ -313,17 +317,15 @@ end
 class Autonomy < Dimensional::Metric
   self.dimension = Dimension::L
   self.base = Unit[:L, :SI, :m]
-  self.default = Unit[:L, :BA, :nm]
-  configure(Unit[:L, :SI, :km], {:preference => 2})
-  configure(Unit[:L, :US, :mi], {:preference => 3.5})
-  configure(Unit[:L, :Imp, :mi], {:preference => 3.5})
+  self.default = Unit[:L, :U, :M]
+  self.universal_systems = [System::U]
 end
 
 class EngineDisplacement < Dimensional::Metric
   self.dimension = Dimensional::Dimension::V
   self.base = Unit[:V, :SI, :l]
   self.default = base
-  configure(Unit[:V, :US, :in3], {:preference => 2})
+  configure(Unit[:V, :US, :in3], {:preference => 3})
 end
 
 class MechanicalPower < Dimensional::Metric

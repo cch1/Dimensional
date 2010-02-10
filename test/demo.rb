@@ -17,6 +17,7 @@ Dimension.register('Volume', 'V', {Dimension::L => 3})
 Dimension.register('Velocity', 'Vel', {Dimension::L => 1, Dimension::T => -1})
 Dimension.register('Acceleration', 'Acc', {Dimension::L => 1, Dimension::T => -2})
 Dimension.register('Force', 'F', {Dimension::M => 1, Dimension::L => 1, Dimension::T => -2})
+Dimension.register('Pressure', 'Press', {Dimension::M => 1, Dimension::L => -1, Dimension::T => -2})
 Dimension.register('Torque', 'τ', {Dimension::M => 1, Dimension::L => 2, Dimension::T => -2}) # equivalent to Energy
 Dimension.register('Energy', 'E', {Dimension::M => 1, Dimension::L => 2, Dimension::T => -2}) # a.k.a. work
 Dimension.register('Power', 'P', {Dimension::M => 1, Dimension::L => 2, Dimension::T => -3})
@@ -30,14 +31,15 @@ System.register('US Customary Troy (oz)', 'USt')  # http://en.wikipedia.org/wiki
 System.register('British Imperial (lbs, ton, ft)', 'Imp')  # http://en.wikipedia.org/wiki/Imperial_units
 System.register('British Admiralty', 'BA')
 System.register('Foot-Pound-Second', 'FPS') #http://en.wikipedia.org/wiki/Foot-pound-second_system
+System.register('Furlong/Firkin/Fortnight', 'FFF') # http://en.wikipedia.org/wiki/FFF_System
 
 Configurator.start do
   dimension(:L) do
     system(:SI) do
       base('meter', 'm', :detector => /\A(met(er|re)s?|m)\Z/) do
-        derive('decimeter', 'dm', Rational(1, 10), :detector => /\A(decimet(er|re)s?|dm)\Z/, :preference => 0.5)
+        derive('decimeter', 'dm', Rational(1, 10), :detector => /\A(decimet(er|re)s?|dm)\Z/, :preference => -3)
         derive('centimeter', 'cm', Rational(1, 100), :detector => /\A(centimet(er|re)s?|cm)\Z/)
-        derive('decameter', 'dam', 10, :detector => /\A(de(c|k)amet(er|re)s?|dam)\Z/)
+        derive('decameter', 'dam', 10, :detector => /\A(de(c|k)amet(er|re)s?|dam)\Z/, :preference => -3)
         derive('kilometer', 'km', 1000, :detector => /\A(kilomet(er|re)s?|km)\Z/)
       end
     end
@@ -141,6 +143,7 @@ Configurator.start do
         end
       end
       combine('square foot', 'ft2', {Unit[:L, :US, :ft] => 2}, :detector => /ft2/)
+      combine('square inch', 'in2', {Unit[:L, :US, :in] => 2}, :detector => /in2/)
     end
   end
 
@@ -160,7 +163,7 @@ Configurator.start do
           derive('cup', 'cp', 2, :detector => /\A(cups?|cps?)\Z/) do
             derive('pint', 'pt', 2, :detector => /\A(pints?|pts?)\Z/) do
               derive('quart', 'qt', 2, :detector => /\A(quarts?|qts?)\Z/) do
-                derive('gallon', 'gal', 4, :detector => /\A(gallons?|gal)\Z/)
+                derive('gallon', 'gal', 4, :detector => /\A(gallons?|gals?)\Z/)
               end
             end
           end
@@ -169,7 +172,7 @@ Configurator.start do
     end
     system(:US) do
       combine('cubic inch', 'in3', {Unit[:L, :US, :inch] => 3}, :detector => /\A(cubic inch(es)?|in3)\Z/ ) do
-        derive('gallon', 'g', 231, :detector => /\A(gallons?|gal)\Z/) do
+        derive('gallon', 'gal', 231, :detector => /\A(gallons?|gals?)\Z/) do
           derive('quart', 'qt', Rational(1,4), :detector => /\A(quarts?|qts?)\Z/) do
             derive('pint', 'pt', Rational(1,2), :detector => /\A(pints?|pts?)\Z/) do
               derive('cup', nil, Rational(1,2), :detector => /\Acups?\Z/) do
@@ -194,7 +197,9 @@ Configurator.start do
         derive('minute', 'm', 60, :detector => /\A(minutes?|m)\Z/) do
           derive('hour', 'h', 60, :detector => /\A(hours?|h)\Z/) do
             derive('day', 'd', 24, :detector => /\A(days?)\Z/) do
-              derive('week', 'w', 7, :detector => /\A(weeks?|wks?)\Z/)
+              derive('week', 'w', 7, :detector => /\A(weeks?|wks?)\Z/) do
+                derive('fortnight', nil, 2, :detector => /\A(fortnights?)\Z/)
+              end
               derive('year', 'yr', 365 + Rational(1, 4), :detector => /\A(years?|yrs?)\Z/)
             end
           end
@@ -281,10 +286,18 @@ Configurator.start do
 
   dimension(:Voltage) do
     system(:SI) do
-      combine('Volt', 'V',{Unit[:P, :SI, :W] => 1, Unit[:I, :SI, :A] => -1}, :detector => /\A(volts?|V)\Z/) do
+      combine('Volt', 'V', {Unit[:P, :SI, :W] => 1, Unit[:I, :SI, :A] => -1}, :detector => /\A(volts?|V)\Z/) do
         derive('millivolt', 'mV', Rational(1, 1000))
         derive('kilovolt', 'kV', 1000)
       end
+    end
+  end
+  dimension(:Pressure) do
+    system(:SI) do
+      combine('pascal', 'Pa', {Unit[:F, :SI, :N] => 1, Unit[:A, :SI, :m2] => -1}, :detector => /\A(pascals?|Pa)\Z/)
+    end
+    system(:US) do
+      combine('pound per square inch', 'psi', {Unit[:F, :US, :lbf] => 1, Unit[:A, :US, :in2] => -1}, :detector => /\A(psi)\Z/)
     end
   end
 

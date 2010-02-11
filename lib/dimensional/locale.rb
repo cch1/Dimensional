@@ -1,3 +1,4 @@
+# encoding: UTF-8
 module Dimensional
   # A Locale is a prioritized list of Systems per Metric.
   # Locales solve the problem of parsing ambiguous units such as US gallons and Imperial gallons. They also allow

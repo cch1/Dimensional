@@ -1,3 +1,4 @@
+# encoding: UTF-8
 module Dimensional
   # Represents a dimension that can be used to characterize a physical quantity.  With the exception of certain
   # fundamental dimensions, all dimensions are expressed as a set of exponents relative to the fundamentals.

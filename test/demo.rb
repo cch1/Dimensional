@@ -1,3 +1,4 @@
+# encoding: UTF-8
 require 'dimensional/configurator'
 require 'rational'
 include Dimensional

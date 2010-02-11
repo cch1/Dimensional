@@ -1,3 +1,4 @@
+# encoding: UTF-8
 require 'helper'
 
 class DimensionTest < Test::Unit::TestCase

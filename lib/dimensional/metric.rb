@@ -1,3 +1,4 @@
+# encoding: UTF-8
 require 'dimensional/unit'
 require 'delegate'
 
@@ -16,7 +17,7 @@ module Dimensional
 
       # The units of this metric, grouped by system.
       def units
-        @units ||= Hash.new([]).merge(Unit.select{|u| u.dimension == dimension}.group_by{|u| u.system})
+        @units ||= Unit.select{|u| u.dimension == dimension}.inject(Hash.new{|h, s| h[s] = []}){|h, u| h[u.system] << u;h}
       end
 
       def systems(locale)

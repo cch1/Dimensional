@@ -1,3 +1,4 @@
+# encoding: UTF-8
 require 'dimensional/dimension'
 require 'dimensional/system'
 require 'dimensional/locale'

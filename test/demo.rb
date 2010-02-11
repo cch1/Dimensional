@@ -89,16 +89,14 @@ Configurator.start do
   dimension(:M) do
     system(:SI) do
       base('kilogram', 'kg', :detector => /\A(kilograms?|kg)\Z/) do
-        derive('tonne', 't', 1000, :detector => /\A(tonnes?)\Z/) do # metric ton
-        end
+        derive('tonne', 't', 1000, :detector => /\A(tonnes?)\Z/) # metric ton
         derive('gram', 'g', Rational(1, 1000), :detector => /\A(grams?|g)\Z/)
       end
     end
     system(:US) do # Common units for mass and, occasionally, force/weight (http://en.wikipedia.org/wiki/United_States_customary_units#Units_of_mass)
       reference('pound', 'lb', Unit[:M, :SI, 'gram'], 453.59237, :detector => /\A(pounds?|lbs?|#)\Z/) do # avoirdupois
         derive('hundredweight', 'cwt', 100, :detector => /\A(hundredweights?|cwt)\Z/) do
-          derive('ton', 't', 20, :detector => /\A(tons?|t)\Z/) do # short ton
-          end
+          derive('ton', 't', 20, :detector => /\A(tons?|t)\Z/) # short ton
         end
         derive('ounce', 'oz', Rational(1, 16), :detector => /\A(ounces?|ozs?)\Z/)
         derive('grain', 'gr', Rational(1, 7000), :detector => /\A(grains?|gr)\Z/) do

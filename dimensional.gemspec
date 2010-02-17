@@ -25,7 +25,6 @@ Gem::Specification.new do |s|
      "README",
      "Rakefile",
      "lib/dimensional.rb",
-     "lib/dimensional/configuration.rb",
      "lib/dimensional/configurator.rb",
      "lib/dimensional/dimension.rb",
      "lib/dimensional/locale.rb",
@@ -33,7 +32,6 @@ Gem::Specification.new do |s|
      "lib/dimensional/system.rb",
      "lib/dimensional/unit.rb",
      "lib/dimensional/version.rb",
-     "test/configuration_test.rb",
      "test/configurator_test.rb",
      "test/demo.rb",
      "test/dimension_test.rb",
@@ -52,7 +50,6 @@ Gem::Specification.new do |s|
   s.summary = %q{Dimensional provides handling for numbers with units.}
   s.test_files = [
     "test/helper.rb",
-     "test/configuration_test.rb",
      "test/configurator_test.rb",
      "test/dimension_test.rb",
      "test/dimensional_test.rb",

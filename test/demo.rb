@@ -127,29 +127,29 @@ Configurator.start do
 
   dimension(:A) do
     system(:SI) do
-      combine('square meter', 'm2', {Unit[:L, :SI, :meter] => 2}, :detector => /\A(sq\.?\s?met(er|re)s?|m2)\Z/) do
+      combine('square meter', 'm2', {Unit[:L, :SI, :meter] => 2}, :detector => /\A(sq(uare|\.)?\s+met(er|re)s?|m2)\Z/) do
         derive('hectare', 'ha', 10000, :format => "%.4f%U") do
         end
       end
     end
     system(:US) do # All measures below are approximations due to the difference between a survey foot and an international foot.
-      combine('square yard', 'yd2', {Unit[:L, :US, :yard] => 2}, :detector => /yd2/) do
+      combine('square yard', 'yd2', {Unit[:L, :US, :yard] => 2}, :detector => /\A(sq(uare|\.)?\s+y(ar)?d|yd2)\Z/) do
         derive('acre', nil, 4840)
       end
-      combine('square mile', nil, {Unit[:L, :US, :mile] => 2}, :detector => /\A(sq(uare|\.)?\s?miles?)\Z/) do
+      combine('square mile', nil, {Unit[:L, :US, :mile] => 2}, :detector => /\A(sq(uare|\.)?\s+mi(le)?s?|mi(le)?2)\Z/) do
         self.alias('section', nil, :detector => /\Asections?\Z/) do
           derive('township', 'twp', 36, :detector => /\Atownships?\Z/)
         end
       end
-      combine('square foot', 'ft2', {Unit[:L, :US, :ft] => 2}, :detector => /ft2/)
-      combine('square inch', 'in2', {Unit[:L, :US, :in] => 2}, :detector => /in2/)
+      combine('square foot', 'ft2', {Unit[:L, :US, :ft] => 2}, :detector => /\A(sq(uare|\.)?\s+f(oo|ee)?t|ft2)\Z/)
+      combine('square inch', 'in2', {Unit[:L, :US, :in] => 2}, :detector => /\A(sq(uare|\.)?\s+(ch(es)?)?|in2)\Z/)
     end
   end
 
   dimension(:V) do
     system(:SI) do
-      combine('cubic meter', 'm3', {Unit[:L, :SI, :meter] => 3}, :detector => /\A(cubic met(er|re)s?|m3)\Z/, :preference => -2) do
-        derive('cubic decimeter', 'dm3', Rational(1, 1000), :detector => /\A(cubic decimet(er|re)s?|dm3)\Z/, :preference => -3) do
+      combine('cubic meter', 'm3', {Unit[:L, :SI, :meter] => 3}, :detector => /\A(cubic\s+met(er|re)s?|m3)\Z/, :preference => -3) do
+        derive('cubic decimeter', 'dm3', Rational(1, 1000), :detector => /\A(cubic\s+decimet(er|re)s?|dm3)\Z/, :preference => -4) do
           self.alias('liter', 'l', :detector => /\A(lit(er|re)s?|l|L)\Z/) do
             derive('milliliter', 'ml', Rational(1, 1000), :detector => /\A(millilit(er|re)s?|ml|mL)\Z/)
           end
@@ -157,12 +157,12 @@ Configurator.start do
       end
     end
     system(:Imp) do
-      reference('ounce', 'fl oz', Unit[:V, :SI, 'milliliter'], 28.4130625, :detector => /\A((fluid )?ounces?|oz)\Z/) do
+      reference('ounce', 'fl oz', Unit[:V, :SI, 'milliliter'], 28.4130625, :detector => /\A((fluid\s+)?ounces?|oz)\Z/) do
         derive('gill', 'gi', 5, :detector => /\A(gills?|gis?)\Z/) do
           derive('cup', 'cp', 2, :detector => /\A(cups?|cps?)\Z/) do
             derive('pint', 'pt', 2, :detector => /\A(pints?|pts?)\Z/) do
               derive('quart', 'qt', 2, :detector => /\A(quarts?|qts?)\Z/) do
-                derive('gallon', 'gal', 4, :detector => /\A(gallons?|gals?)\Z/)
+                derive('gallon', 'gal', 4, :detector => /\A(gallons?|gal)\Z/)
               end
             end
           end
@@ -170,14 +170,14 @@ Configurator.start do
       end
     end
     system(:US) do
-      combine('cubic inch', 'in3', {Unit[:L, :US, :inch] => 3}, :detector => /\A(cubic inch(es)?|in3)\Z/ ) do
-        derive('gallon', 'gal', 231, :detector => /\A(gallons?|gals?)\Z/) do
+      combine('cubic inch', 'in3', {Unit[:L, :US, :inch] => 3}, :detector => /\A(cubic\s+in(ch(es)?)?|in3)\Z/ ) do
+        derive('gallon', 'gal', 231, :detector => /\A(gallons?|gal)\Z/) do
           derive('quart', 'qt', Rational(1,4), :detector => /\A(quarts?|qts?)\Z/) do
             derive('pint', 'pt', Rational(1,2), :detector => /\A(pints?|pts?)\Z/) do
               derive('cup', nil, Rational(1,2), :detector => /\Acups?\Z/) do
                 derive('gill', 'gi', Rational(1,2), :detector => /\A(gills?|gis?)\Z/) do
-                  derive('fluid ounce', 'fl oz', Rational(1, 4), :detector => /\A((fluid )?ounces?|oz)\Z/) do
-                    derive('dram', 'dr', Rational(1, 8), :detector => /\A((fluid )?dra(ch)?ms?|(fl )?drs?)\Z/) do
+                  derive('fluid ounce', 'fl oz', Rational(1, 4), :detector => /\A((fluid\s+)?ounces?|oz)\Z/) do
+                    derive('dram', 'dr', Rational(1, 8), :detector => /\A((fluid\s+)?dra(ch)?ms?|(fl\s+)?drs?)\Z/) do
                       derive('minim', '♏', Rational(1, 60))
                     end
                   end

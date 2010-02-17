@@ -2,3 +2,5 @@
 2. Allow locale-specific formatters and detectors.
 3. Default format per dimension/system/metric.
 4. Auto generation of metric prefix units.
+5. Change Metric representation into a subclass of BasicObject instead of DelegateClasss
+   (http://codeidol.com/other/rubyckbk/Numbers/Simulating-a-Subclass-of-Fixnum/)

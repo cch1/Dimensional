@@ -1,4 +1,4 @@
 # encoding: UTF-8
 module Dimensional
-  VERSION = "2.0.1"
+  VERSION = "2.0.2"
 end

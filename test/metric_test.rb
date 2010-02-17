@@ -306,4 +306,19 @@ class MetricTest < Test::Unit::TestCase
     assert_equal "1.8600nm", distance.parse('1.8565454 nm', Locale::BA).strfmeasure("%.4f%U")
     assert_equal "1.86", distance.parse('1.8565454 nm', Locale::BA).strfmeasure("%s")
   end
+
+  # A "true" metric (for some values of true) with negative magnitude has dubious semantics, but we try to support it.
+  def test_load_negative
+    distance = Class.new(Metric)
+    distance.dimension = Dimension::L
+    distance.base = @meter
+    assert_equal distance.new(-1, @meter), distance.load(-1)
+  end
+
+  def test_load_zero
+    distance = Class.new(Metric)
+    distance.dimension = Dimension::L
+    distance.base = @meter
+    assert_equal distance.new(0, @meter), distance.load(0)
+  end
 end

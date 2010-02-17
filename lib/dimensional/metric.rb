@@ -76,6 +76,7 @@ module Dimensional
 
       # Create a new instance with the given value (assumed to be in the base unit) and convert it to the preferred unit.
       def load(v)
+        raise "No base unit defined" unless base
         new(v, base).preferred
       end
     end
@@ -104,8 +105,8 @@ module Dimensional
     # Convert into the best unit for the given Locale.  The first system of the given locale with units is elected the preferred system,
     # and within the preferred system, preference is given to units yielding a metric whose order of magnitude is close to zero.
     def localize(locale = Locale.default)
-      target_oom = Math.log10(self) + Math.log10(self.unit.factor)
       preferred_system = self.class.systems(locale).detect{ |s| self.class.units[s].any? }
+      target_oom = Math.log10(self.abs) + Math.log10(self.unit.factor) rescue -(1.0/0.0) # Ruby 1.8.6 raises an exception on log10(0) instead of -Infinity
       bu = self.class.best_fit(target_oom, preferred_system)
       convert(bu)
     end
